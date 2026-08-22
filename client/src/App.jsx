@@ -6,13 +6,13 @@ import RegionalSelections from './components/home/RegionalSelections.jsx';
 import PreviousTrips from './components/home/PreviousTrips.jsx';
 import FloatingPlanButton from './components/common/FloatingPlanButton.jsx';
 import CreateTripWizard from './components/wizard/CreateTripWizard.jsx';
-import TripDetailsModal from './components/modals/TripDetailsModal.jsx';
+import DayWiseItineraryView from './components/itinerary/DayWiseItineraryView.jsx';
 import RegionDetailsModal from './components/modals/RegionDetailsModal.jsx';
 import { apiService } from './services/api.js';
 import './App.css';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'trips' | 'community' | 'create-trip'
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'trips' | 'community' | 'create-trip' | 'itinerary-view'
   const [user, setUser] = useState(null);
   const [regions, setRegions] = useState([]);
   const [trips, setTrips] = useState([]);
@@ -23,8 +23,8 @@ export function App() {
   const [activeSort, setActiveSort] = useState('default'); // 'default' | 'title' | 'date'
   const [activeGroupBy, setActiveGroupBy] = useState('none'); // 'none' | 'region' | 'status'
 
-  // Modal & Wizard States
-  const [selectedTrip, setSelectedTrip] = useState(null);
+  // Selected & Modal States
+  const [activeItineraryTrip, setActiveItineraryTrip] = useState(null);
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
@@ -48,12 +48,13 @@ export function App() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Handle completed trip creation from wizard
+  // Handle completed trip creation from wizard -> navigate to Itinerary View
   const handleWizardComplete = async (tripFormData) => {
     const createdTrip = await apiService.createTrip(tripFormData);
     setTrips((prev) => [createdTrip, ...prev]);
-    setActiveTab('home');
-    showToast(`🎉 "${createdTrip.name}" has been created successfully!`);
+    setActiveItineraryTrip(createdTrip);
+    setActiveTab('itinerary-view');
+    showToast(`🎉 "${createdTrip.name}" itinerary created!`);
   };
 
   // Handle saving draft from wizard
@@ -136,7 +137,11 @@ export function App() {
 
       {/* 1. Header Navigation Bar */}
       <Navbar
-        activeTab={activeTab === 'create-trip' ? 'trips' : activeTab}
+        activeTab={
+          activeTab === 'create-trip' || activeTab === 'itinerary-view'
+            ? 'trips'
+            : activeTab
+        }
         onTabChange={(tab) => {
           setActiveTab(tab);
           if (tab === 'trips') {
@@ -152,6 +157,14 @@ export function App() {
 
       {/* Main Page Content */}
       <main className="main-content">
+        {activeTab === 'itinerary-view' && (
+          <DayWiseItineraryView
+            trip={activeItineraryTrip}
+            onEditItinerary={() => setActiveTab('create-trip')}
+            onBackToDashboard={() => setActiveTab('home')}
+          />
+        )}
+
         {activeTab === 'create-trip' && (
           <CreateTripWizard
             onComplete={handleWizardComplete}
@@ -189,7 +202,10 @@ export function App() {
             {/* 5. Previous Trips Section */}
             <PreviousTrips
               trips={processedTrips}
-              onViewDetails={(trip) => setSelectedTrip(trip)}
+              onViewDetails={(trip) => {
+                setActiveItineraryTrip(trip);
+                setActiveTab('itinerary-view');
+              }}
               onViewAll={() => setActiveTab('trips')}
               onPlanTrip={() => setActiveTab('create-trip')}
             />
@@ -227,7 +243,10 @@ export function App() {
 
             <PreviousTrips
               trips={processedTrips}
-              onViewDetails={(trip) => setSelectedTrip(trip)}
+              onViewDetails={(trip) => {
+                setActiveItineraryTrip(trip);
+                setActiveTab('itinerary-view');
+              }}
               onViewAll={() => {}}
               onPlanTrip={() => setActiveTab('create-trip')}
             />
@@ -254,17 +273,11 @@ export function App() {
       </main>
 
       {/* 6. Floating Action Button: + Plan a trip */}
-      {activeTab !== 'create-trip' && (
+      {activeTab !== 'create-trip' && activeTab !== 'itinerary-view' && (
         <FloatingPlanButton onClick={() => setActiveTab('create-trip')} />
       )}
 
-      {/* 7. Details Modals */}
-      <TripDetailsModal
-        trip={selectedTrip}
-        isOpen={Boolean(selectedTrip)}
-        onClose={() => setSelectedTrip(null)}
-      />
-
+      {/* 7. Region Details Modal */}
       <RegionDetailsModal
         region={selectedRegion}
         isOpen={Boolean(selectedRegion)}

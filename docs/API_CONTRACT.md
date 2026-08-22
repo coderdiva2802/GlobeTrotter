@@ -385,38 +385,78 @@ Saves or updates multi-stop itineraries from Step 2 of the Trip Wizard ("Build y
 }
 ```
 
-#### `GET /api/activities/search`
-Searches for activities and attractions to add to a trip stop.
+#### `GET /api/trips/:id/itinerary`
+Fetches the complete day-wise itinerary, time-slotted activities, and budget summary for a trip.
 
-- **Query Parameters:**
-  - `city` *(string, optional)*: Filter by city name (e.g. `"Paris"`, `"Amsterdam"`, `"Berlin"`).
-  - `q` *(string, optional)*: Search keyword.
+- **Headers:** `Authorization: Bearer <token>`
 - **Response `200 OK`**:
 ```json
 {
   "success": true,
-  "data": [
-    {
-      "id": 501,
-      "name": "Louvre Museum Guided Tour",
-      "cityName": "Paris",
-      "category": "Culture",
-      "durationMinutes": 180,
-      "rating": 4.8,
-      "estimatedCost": 3500,
+  "data": {
+    "trip": {
+      "id": 105,
+      "name": "abc",
+      "status": "UPCOMING",
+      "locationSummary": "xyz",
+      "startDate": "2026-08-31T00:00:00.000Z",
+      "endDate": "2026-09-05T00:00:00.000Z",
+      "formattedDates": "2026-08-31 - 2026-09-05",
+      "coverImageUrl": "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1600&q=80"
+    },
+    "budgetSummary": {
+      "totalBudget": 120000,
+      "totalBudgetFormatted": "₹1,20,000",
+      "plannedExpenses": 96500,
+      "plannedExpensesFormatted": "₹96,500",
+      "remainingBudget": 23500,
+      "remainingBudgetFormatted": "₹23,500",
       "currency": "INR"
     },
-    {
-      "id": 502,
-      "name": "Amsterdam Canal Cruise & Wine Tasting",
-      "cityName": "Amsterdam",
-      "category": "Sightseeing",
-      "durationMinutes": 90,
-      "rating": 4.9,
-      "estimatedCost": 2800,
-      "currency": "INR"
-    }
-  ]
+    "days": [
+      {
+        "dayNumber": 1,
+        "dayLabel": "Day 1",
+        "dateFormatted": "June 10",
+        "cityName": "Paris",
+        "locationHeader": "Paris • June 10",
+        "items": [
+          { "id": 1, "time": "09:00 AM", "activityName": "Eiffel Tower", "expense": 2500, "expenseFormatted": "₹2,500" },
+          { "id": 2, "time": "01:00 PM", "activityName": "Lunch at Le Marais", "expense": 1800, "expenseFormatted": "₹1,800" },
+          { "id": 3, "time": "05:30 PM", "activityName": "Seine River Cruise", "expense": 3000, "expenseFormatted": "₹3,000" }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "dayLabel": "Day 2",
+        "dateFormatted": "June 11",
+        "cityName": "Paris",
+        "locationHeader": "Paris • June 11",
+        "items": [
+          { "id": 4, "time": "10:00 AM", "activityName": "Louvre Museum", "expense": 2000, "expenseFormatted": "₹2,000" },
+          { "id": 5, "time": "03:00 PM", "activityName": "Montmartre Walk", "expense": 0, "expenseFormatted": "Free" },
+          { "id": 6, "time": "08:00 PM", "activityName": "Dinner Experience", "expense": 2500, "expenseFormatted": "₹2,500" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+#### `POST /api/trips/:id/share`
+Generates a secure public share token for the itinerary.
+
+- **Headers:** `Authorization: Bearer <token>`
+- **Response `200 OK`**:
+```json
+{
+  "success": true,
+  "data": {
+    "shareToken": "gt_share_9f8d2b1a",
+    "shareUrl": "http://localhost:5174/share/gt_share_9f8d2b1a",
+    "isActive": true,
+    "viewCount": 0
+  }
 }
 ```
 

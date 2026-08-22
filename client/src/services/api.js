@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { mockUser, mockRegions, mockTrips, mockCities, mockActivities } from './mockData.js';
+import { mockUser, mockRegions, mockTrips, mockCities, mockActivities, mockDayWiseItinerary } from './mockData.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -178,18 +178,31 @@ export const apiService = {
   },
 
   /**
-   * Batch save trip stops
+   * Get full day-wise itinerary and budget summary
    */
-  async saveTripStops(tripId, stops) {
+  async getTripItinerary(tripId) {
     try {
-      const response = await apiClient.put(`/trips/${tripId}/stops`, { stops });
+      const response = await apiClient.get(`/trips/${tripId}/itinerary`);
       return response.data.data;
     } catch {
+      return mockDayWiseItinerary;
+    }
+  },
+
+  /**
+   * Generate public shareable link
+   */
+  async shareTrip(tripId) {
+    try {
+      const response = await apiClient.post(`/trips/${tripId}/share`);
+      return response.data.data;
+    } catch {
+      const token = `gt_share_${Math.random().toString(36).substring(2, 10)}`;
       return {
-        tripId,
-        stops,
-        totalBudget: stops.reduce((acc, s) => acc + (Number(s.budget) || 0), 0),
-        currency: 'INR',
+        shareToken: token,
+        shareUrl: `${window.location.origin}/share/${token}`,
+        isActive: true,
+        viewCount: 1,
       };
     }
   },

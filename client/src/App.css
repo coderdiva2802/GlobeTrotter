@@ -2080,4 +2080,390 @@
   }
 }
 
+/* ==========================================================================
+   13. Day-Wise Itinerary & Budget Overview
+   ========================================================================== */
+.itinerary-page-layout {
+  max-width: 1040px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 3rem;
+}
+
+.itinerary-nav-back-row {
+  display: flex;
+  align-items: center;
+}
+
+.itinerary-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.itinerary-back-btn:hover {
+  color: var(--text-main);
+  background-color: var(--bg-subtle);
+}
+
+/* Hero Section */
+.itinerary-hero-section {
+  width: 100%;
+}
+
+.itinerary-hero-container {
+  position: relative;
+  width: 100%;
+  min-height: 200px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  box-shadow: var(--shadow-sm);
+}
+
+.itinerary-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 35%;
+  filter: brightness(0.85);
+}
+
+.itinerary-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.2) 0%,
+    rgba(15, 23, 42, 0.75) 60%,
+    rgba(15, 23, 42, 0.92) 100%
+  );
+}
+
+.itinerary-hero-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 1.85rem 2.25rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.itinerary-hero-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.itinerary-status-wrapper {
+  margin-bottom: 2px;
+}
+
+.itinerary-hero-title {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.itinerary-hero-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hero-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.hero-meta-icon {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.itinerary-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.itinerary-edit-btn {
+  padding: 0.6rem 1.25rem;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.itinerary-edit-btn:hover {
+  background-color: var(--bg-subtle);
+  border-color: var(--border-hover);
+}
+
+.itinerary-share-btn {
+  padding: 0.6rem 1.35rem;
+  background-color: #5850ec;
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(88, 80, 236, 0.35);
+  transition: all var(--transition-fast);
+}
+
+.itinerary-share-btn:hover {
+  background-color: #4f46e5;
+  transform: translateY(-1px);
+}
+
+/* Budget Summary Bar */
+.budget-summary-bar {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 1.35rem 2.25rem;
+  box-shadow: var(--shadow-sm);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.budget-summary-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.budget-summary-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.budget-summary-val {
+  font-family: var(--font-heading);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.remaining-positive {
+  color: #059669 !important;
+}
+
+/* Day-wise Itinerary Cards */
+.day-wise-section-header {
+  margin-top: 0.5rem;
+}
+
+.day-wise-main-title {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.day-itinerary-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.day-itinerary-card {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 1.65rem 2rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.day-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.5rem;
+}
+
+.day-card-title {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.day-card-location {
+  font-size: 0.88rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Schedule Table */
+.day-schedule-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule-table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+}
+
+.schedule-table-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.schedule-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid #f8fafc;
+  font-size: 0.92rem;
+  transition: background-color var(--transition-fast);
+}
+
+.schedule-row:last-child {
+  border-bottom: none;
+}
+
+.col-time {
+  width: 140px;
+  color: #64748b;
+  font-weight: 500;
+  font-size: 0.86rem;
+}
+
+.col-activity {
+  flex: 1;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.col-expense {
+  width: 120px;
+  text-align: right;
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+/* Share Modal Elements */
+.share-trip-preview-banner {
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.15rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.share-globe-icon {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.share-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.share-link-input {
+  flex: 1;
+  padding: 0.68rem 0.85rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  color: var(--text-main);
+  background-color: #ffffff;
+}
+
+.share-copy-btn {
+  padding: 0.68rem 1.15rem;
+  background-color: var(--primary);
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  transition: background var(--transition-fast);
+}
+
+.share-copy-btn:hover {
+  background-color: var(--primary-hover);
+}
+
+@media (max-width: 768px) {
+  .itinerary-hero-content {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+  }
+
+  .itinerary-hero-actions {
+    width: 100%;
+  }
+
+  .itinerary-edit-btn,
+  .itinerary-share-btn {
+    flex: 1;
+    text-align: center;
+  }
+
+  .budget-summary-bar {
+    grid-template-columns: 1fr;
+    padding: 1.25rem;
+  }
+
+  .col-time {
+    width: 90px;
+  }
+
+  .col-expense {
+    width: 80px;
+  }
+}
+
+
 

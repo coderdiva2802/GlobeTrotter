@@ -210,4 +210,55 @@ export const mockActivities = [
   },
 ];
 
+export const mockDayWiseItinerary = {
+  trip: {
+    id: 105,
+    name: "abc",
+    status: "UPCOMING",
+    locationSummary: "xyz",
+    startDate: "2026-08-31",
+    endDate: "2026-09-05",
+    formattedDates: "2026-08-31 - 2026-09-05",
+    coverImageUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1600&q=80",
+  },
+  budgetSummary: {
+    totalBudget: 120000,
+    totalBudgetFormatted: "₹1,20,000",
+    plannedExpenses: 96500,
+    plannedExpensesFormatted: "₹96,500",
+    remainingBudget: 23500,
+    remainingBudgetFormatted: "₹23,500",
+    currency: "INR",
+  },
+  days: [
+    {
+      id: 1,
+      dayNumber: 1,
+      dayLabel: "Day 1",
+      dateFormatted: "June 10",
+      cityName: "Paris",
+      locationHeader: "Paris • June 10",
+      items: [
+        { id: 1, time: "09:00 AM", activityName: "Eiffel Tower", expense: 2500, expenseFormatted: "₹2,500" },
+        { id: 2, time: "01:00 PM", activityName: "Lunch at Le Marais", expense: 1800, expenseFormatted: "₹1,800" },
+        { id: 3, time: "05:30 PM", activityName: "Seine River Cruise", expense: 3000, expenseFormatted: "₹3,000" },
+      ],
+    },
+    {
+      id: 2,
+      dayNumber: 2,
+      dayLabel: "Day 2",
+      dateFormatted: "June 11",
+      cityName: "Paris",
+      locationHeader: "Paris • June 11",
+      items: [
+        { id: 4, time: "10:00 AM", activityName: "Louvre Museum", expense: 2000, expenseFormatted: "₹2,000" },
+        { id: 5, time: "03:00 PM", activityName: "Montmartre Walk", expense: 0, expenseFormatted: "Free" },
+        { id: 6, time: "08:00 PM", activityName: "Dinner Experience", expense: 2500, expenseFormatted: "₹2,500" },
+      ],
+    },
+  ],
+};
+
+
 
