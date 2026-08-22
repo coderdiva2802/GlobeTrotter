@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import FormInput from '../common/FormInput';
 import Toast from '../common/Toast';
@@ -7,6 +7,7 @@ import './LoginForm.css';
 
 export default function LoginForm() {
   const { login, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: '',
@@ -58,6 +59,9 @@ export default function LoginForm() {
         type: 'success',
         message: 'Welcome back! Login successful.',
       });
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 400);
     } else {
       setToast({
         type: 'error',

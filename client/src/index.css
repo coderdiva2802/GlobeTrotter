@@ -1,56 +1,76 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Brand Colors */
+  /* Primary & Brand Colors */
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-light: #eef2ff;
+  --primary-dark: #3730a3;
   --color-primary: #4f6bf5;
   --color-primary-hover: #4157d9;
   --color-primary-light: #eef2ff;
   --color-primary-glow: rgba(79, 107, 245, 0.25);
 
-  /* Dark Overlay / Hero Colors */
-  --hero-bg-deep: #162033;
-  --hero-accent-blue: #5478f7;
-
-  /* Neutral Surface & Borders */
+  /* Page Backgrounds & Cards */
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-subtle: #f1f5f9;
   --color-bg-app: #f1f5f9;
   --color-surface: #ffffff;
-  --color-border: #e2e8f0;
-  --color-border-hover: #cbd5e1;
-  --color-border-focus: #4f6bf5;
 
   /* Typography Colors */
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-light: #94a3b8;
+  --text-inverted: #ffffff;
   --color-text-title: #1e293b;
   --color-text-body: #475569;
   --color-text-muted: #64748b;
   --color-text-placeholder: #94a3b8;
   --color-text-white: #ffffff;
 
-  /* Functional / Status Colors */
+  /* Borders */
+  --border-color: #e2e8f0;
+  --border-hover: #cbd5e1;
+  --color-border: #e2e8f0;
+  --color-border-hover: #cbd5e1;
+  --color-border-focus: #4f6bf5;
+
+  /* Status Colors */
+  --status-completed-bg: #ecfdf5;
+  --status-completed-text: #059669;
+  --status-completed-border: #a7f3d0;
+  --status-upcoming-bg: #fffbeb;
+  --status-upcoming-text: #d97706;
+  --status-upcoming-border: #fde68a;
   --color-error: #ef4444;
   --color-error-bg: #fef2f2;
   --color-success: #10b981;
   --color-success-bg: #ecfdf5;
 
   /* Typography */
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-family-primary: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-heading: 'Outfit', 'Plus Jakarta Sans', sans-serif;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 12px 28px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
-  --shadow-btn: 0 4px 14px 0 rgba(79, 107, 245, 0.35);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  --shadow-float: 0 12px 30px -4px rgba(79, 70, 229, 0.35);
 
-  /* Border Radii */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
   --radius-xl: 24px;
   --radius-full: 9999px;
 
   /* Transitions */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 *, *::before, *::after {
@@ -61,12 +81,13 @@
 
 html, body {
   min-height: 100vh;
-  font-family: var(--font-family-primary);
-  background-color: var(--color-bg-app);
-  color: var(--color-text-body);
+  font-family: var(--font-family);
+  background-color: var(--bg-page);
+  color: var(--text-main);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 #root {
@@ -77,15 +98,16 @@ html, body {
 }
 
 button {
-  cursor: pointer;
   font-family: inherit;
+  cursor: pointer;
   border: none;
+  outline: none;
   background: none;
 }
 
-input, textarea, select {
+input, select, textarea {
   font-family: inherit;
-  font-size: inherit;
+  outline: none;
 }
 
 a {
@@ -107,4 +129,20 @@ a {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.35s ease-out forwards;
 }
