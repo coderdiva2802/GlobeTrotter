@@ -76,9 +76,14 @@ enum ImageSource {
 
 model User {
   id           Int      @id @default(autoincrement())
-  name         String
+  firstName    String
+  lastName     String?
   email        String   @unique
   passwordHash String
+  phoneNumber  String?
+  city         String?
+  country      String?
+  bio          String?
   role         UserRole @default(USER)
 
   profileImageUrl String?
