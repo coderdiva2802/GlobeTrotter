@@ -27,17 +27,18 @@ import { CreateTripWizard } from './components/wizard/CreateTripWizard.jsx';
 import { DayWiseItineraryView } from './components/itinerary/DayWiseItineraryView.jsx';
 
 import { apiService } from './services/api.js';
+import { mockRegions, mockTrips } from './services/mockData.js';
 import './App.css';
 
 function Dashboard() {
   const navigate = useNavigate();
-  const { user: authUser, logout } = useAuth();
+  const { user: authUser } = useAuth();
   const [activeTab, setActiveTab] = useState('home'); // 'home' | 'trips' | 'calendar' | 'community' | 'create-trip' | 'itinerary-view'
   const [tripsViewMode, setTripsViewMode] = useState('cards'); // 'cards' | 'calendar'
 
   const [userData, setUserData] = useState(null);
-  const [regions, setRegions] = useState([]);
-  const [trips, setTrips] = useState([]);
+  const [regions, setRegions] = useState(mockRegions);
+  const [trips, setTrips] = useState(mockTrips);
   const [activities, setActivities] = useState([]);
 
   // Search & Filter States
@@ -64,16 +65,24 @@ function Dashboard() {
   // Load initial data
   useEffect(() => {
     async function loadData() {
-      const [fetchedUser, regionsData, tripsData, activitiesData] = await Promise.all([
-        apiService.getCurrentUser(),
-        apiService.getRegions(),
-        apiService.getUserTrips(),
-        apiService.searchActivities({ query: searchQuery }),
-      ]);
-      setUserData(fetchedUser);
-      setRegions(regionsData);
-      setTrips(tripsData);
-      setActivities(activitiesData?.activities || []);
+      try {
+        const [fetchedUser, regionsData, tripsData, activitiesData] = await Promise.all([
+          apiService.getCurrentUser(),
+          apiService.getRegions(),
+          apiService.getUserTrips(),
+          apiService.searchActivities({ query: searchQuery }),
+        ]);
+        setUserData(fetchedUser);
+        if (Array.isArray(regionsData) && regionsData.length > 0) {
+          setRegions(regionsData);
+        }
+        if (Array.isArray(tripsData) && tripsData.length > 0) {
+          setTrips(tripsData);
+        }
+        setActivities(activitiesData?.activities || []);
+      } catch (err) {
+        console.error('Error loading data:', err);
+      }
     }
     loadData();
   }, [searchQuery]);
@@ -179,15 +188,17 @@ function Dashboard() {
     return result;
   }, [trips, activeFilter, searchQuery, activeSort]);
 
-  // Filter regions by search query
+  // Filter regions by search query with guaranteed mock fallback
   const processedRegions = useMemo(() => {
-    if (!searchQuery.trim()) return regions;
+    const list = Array.isArray(regions) && regions.length > 0 ? regions : mockRegions;
+    if (!searchQuery.trim()) return list;
     const q = searchQuery.toLowerCase();
-    return regions.filter(
+    const filtered = list.filter(
       (r) =>
-        r.name.toLowerCase().includes(q) ||
+        r.name?.toLowerCase().includes(q) ||
         (r.description && r.description.toLowerCase().includes(q))
     );
+    return filtered.length > 0 ? filtered : list;
   }, [regions, searchQuery]);
 
   return (
@@ -266,7 +277,7 @@ function Dashboard() {
               regions={processedRegions}
               onSelectRegion={(region) => setSelectedRegion(region)}
               onViewAll={() => {
-                showToast(`Viewing all destinations in ${regions.length} continents`);
+                showToast(`Viewing all destinations in ${processedRegions.length} regions`);
               }}
             />
 
@@ -295,25 +306,11 @@ function Dashboard() {
 
         {activeTab === 'calendar' && (
           <TripsCalendarView
+            userTrips={trips}
             onSelectTrip={(calTrip) => {
-              const matchingTrip = trips.find((t) => t.id === calTrip.tripId || t.name === calTrip.name) || {
-                id: calTrip.id,
-                name: calTrip.name || calTrip.title,
-                description: calTrip.description || 'Custom planned itinerary on calendar.',
-                startDate: calTrip.startDate,
-                endDate: calTrip.endDate,
-                formattedDates: `${calTrip.startDate} - ${calTrip.endDate}`,
-                travelerCount: calTrip.travelerCount || 2,
-                travelerLabel: `${calTrip.travelerCount || 2} Travelers`,
-                status: (calTrip.category || 'UPCOMING').toUpperCase(),
-                statusLabel: calTrip.categoryLabel || 'Upcoming',
-                coverImageUrl: calTrip.coverImageUrl,
-                locationSummary: calTrip.locationSummary,
-                stops: calTrip.stops || [{ id: 1, cityName: calTrip.locationSummary || 'Destination', countryName: '', order: 1 }],
-                budget: calTrip.budget || 25000,
-                currency: calTrip.currency || 'INR',
-              };
-              setSelectedTrip(matchingTrip);
+              const matchingTrip = trips.find((t) => t.id === calTrip.id || t.name === calTrip.name) || calTrip;
+              setActiveItineraryTrip(matchingTrip);
+              setActiveTab('itinerary-view');
             }}
           />
         )}
@@ -364,25 +361,11 @@ function Dashboard() {
 
             {tripsViewMode === 'calendar' ? (
               <TripsCalendarView
+                userTrips={trips}
                 onSelectTrip={(calTrip) => {
-                  const matchingTrip = trips.find((t) => t.id === calTrip.tripId || t.name === calTrip.name) || {
-                    id: calTrip.id,
-                    name: calTrip.name || calTrip.title,
-                    description: calTrip.description || 'Custom planned itinerary on calendar.',
-                    startDate: calTrip.startDate,
-                    endDate: calTrip.endDate,
-                    formattedDates: `${calTrip.startDate} - ${calTrip.endDate}`,
-                    travelerCount: calTrip.travelerCount || 2,
-                    travelerLabel: `${calTrip.travelerCount || 2} Travelers`,
-                    status: (calTrip.category || 'UPCOMING').toUpperCase(),
-                    statusLabel: calTrip.categoryLabel || 'Upcoming',
-                    coverImageUrl: calTrip.coverImageUrl,
-                    locationSummary: calTrip.locationSummary,
-                    stops: calTrip.stops || [{ id: 1, cityName: calTrip.locationSummary || 'Destination', countryName: '', order: 1 }],
-                    budget: calTrip.budget || 25000,
-                    currency: calTrip.currency || 'INR',
-                  };
-                  setSelectedTrip(matchingTrip);
+                  const matchingTrip = trips.find((t) => t.id === calTrip.id || t.name === calTrip.name) || calTrip;
+                  setActiveItineraryTrip(matchingTrip);
+                  setActiveTab('itinerary-view');
                 }}
               />
             ) : (

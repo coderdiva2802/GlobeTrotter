@@ -1,40 +1,140 @@
-import { useState, useEffect } from 'react';
-import CalendarBanner from './CalendarBanner';
-import CalendarHeader from './CalendarHeader';
-import CalendarGrid from './CalendarGrid';
-import CalendarLegend from './CalendarLegend';
-import CalendarTipBanner from './CalendarTipBanner';
-import { apiService } from '../../services/api';
+import { useState, useEffect, useMemo } from 'react';
+import CalendarBanner from './CalendarBanner.jsx';
+import CalendarHeader from './CalendarHeader.jsx';
+import CalendarGrid from './CalendarGrid.jsx';
+import CalendarLegend from './CalendarLegend.jsx';
+import CalendarTipBanner from './CalendarTipBanner.jsx';
+import { apiService } from '../../services/api.js';
+import { mockTrips } from '../../services/mockData.js';
 import './TripsCalendarView.css';
 
-export default function TripsCalendarView({ onSelectTrip }) {
-  // Start on January 2024 to match design, with dynamic navigation
-  const [currentDate, setCurrentDate] = useState(new Date(2024, 0, 1));
+/**
+ * Maps user created trips into calendar event items
+ */
+function mapTripsToCalendarEvents(tripsList = []) {
+  if (!Array.isArray(tripsList) || tripsList.length === 0) return [];
+
+  return tripsList.map((t) => {
+    const sDate = t.startDate ? String(t.startDate).split('T')[0] : '';
+    const eDate = t.endDate ? String(t.endDate).split('T')[0] : sDate;
+
+    const statusKey = String(t.status || 'UPCOMING').toUpperCase();
+    let pillClass = 'calendar-pill-upcoming';
+    let category = 'upcoming';
+    let categoryLabel = 'Upcoming Trips';
+    let prefixIcon = '✈️';
+    let suffixIcon = '✈️';
+
+    if (statusKey === 'COMPLETED') {
+      pillClass = 'calendar-pill-planned';
+      category = 'completed';
+      categoryLabel = 'Completed';
+      prefixIcon = '✅';
+      suffixIcon = '🏁';
+    } else if (statusKey === 'ONGOING' || statusKey === 'IN_PROGRESS') {
+      pillClass = 'calendar-pill-in-progress';
+      category = 'in-progress';
+      categoryLabel = 'In Progress';
+      prefixIcon = '⏳';
+      suffixIcon = '📅';
+    }
+
+    return {
+      id: t.id || `trip-${Math.random()}`,
+      tripId: t.id,
+      name: t.name,
+      title: t.name,
+      startDate: sDate,
+      endDate: eDate,
+      date: sDate,
+      category,
+      categoryLabel,
+      pillClass,
+      prefixIcon,
+      suffixIcon,
+      locationSummary: t.locationSummary || t.destination || 'Travel Journey',
+      description: t.description || '',
+      budget: t.budget,
+      currency: t.currency || 'INR',
+      travelerCount: t.travelerCount || 1,
+      coverImageUrl: t.coverImageUrl,
+      stops: t.stops || [],
+      originalTrip: t,
+    };
+  });
+}
+
+export default function TripsCalendarView({ userTrips = [], onSelectTrip }) {
   const [activeCategory, setActiveCategory] = useState('all');
-  const [events, setEvents] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [fetchedTrips, setFetchedTrips] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Combine props userTrips with fetchedTrips or mockTrips fallback
+  const effectiveTrips = useMemo(() => {
+    if (Array.isArray(userTrips) && userTrips.length > 0) {
+      return userTrips;
+    }
+    if (Array.isArray(fetchedTrips) && fetchedTrips.length > 0) {
+      return fetchedTrips;
+    }
+    return mockTrips;
+  }, [userTrips, fetchedTrips]);
+
+  // Map trips to calendar events
+  const allEvents = useMemo(() => {
+    return mapTripsToCalendarEvents(effectiveTrips);
+  }, [effectiveTrips]);
+
+  // Determine initial date: focus on the earliest/upcoming trip date, or default to current month
+  const initialDate = useMemo(() => {
+    if (allEvents.length > 0 && allEvents[0].startDate) {
+      const parts = allEvents[0].startDate.split('-');
+      if (parts.length === 3) {
+        const y = Number(parts[0]);
+        const m = Number(parts[1]) - 1; // 0-indexed month
+        if (!isNaN(y) && !isNaN(m)) {
+          return new Date(y, m, 1);
+        }
+      }
+    }
+    return new Date();
+  }, [allEvents]);
+
+  const [currentDate, setCurrentDate] = useState(initialDate);
+
+  // Update currentDate if initialDate changes (e.g. initial load)
+  useEffect(() => {
+    setCurrentDate(initialDate);
+  }, [initialDate]);
+
+  // Load user trips if userTrips prop was not passed
+  useEffect(() => {
+    if (!userTrips || userTrips.length === 0) {
+      async function loadTrips() {
+        setIsLoading(true);
+        try {
+          const tripsData = await apiService.getUserTrips();
+          setFetchedTrips(tripsData || []);
+        } catch {
+          setFetchedTrips(mockTrips);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+      loadTrips();
+    }
+  }, [userTrips]);
+
+  // Filter events by active category
+  const filteredEvents = useMemo(() => {
+    if (!activeCategory || activeCategory === 'all') return allEvents;
+    return allEvents.filter((e) => e.category === activeCategory);
+  }, [allEvents, activeCategory]);
 
   const monthYearLabel = currentDate.toLocaleString('en-US', {
     month: 'long',
     year: 'numeric',
   });
-
-  const monthYearStr = `${currentDate.getFullYear()}-${String(
-    currentDate.getMonth() + 1
-  ).padStart(2, '0')}`;
-
-  useEffect(() => {
-    async function loadCalendarEvents() {
-      setIsLoading(true);
-      try {
-        const data = await apiService.getCalendarTrips(monthYearStr, activeCategory);
-        setEvents(data?.events || []);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    loadCalendarEvents();
-  }, [monthYearStr, activeCategory]);
 
   const handlePrevMonth = () => {
     setCurrentDate(
@@ -50,7 +150,7 @@ export default function TripsCalendarView({ onSelectTrip }) {
 
   const handleSelectEvent = (event) => {
     if (onSelectTrip) {
-      onSelectTrip(event);
+      onSelectTrip(event.originalTrip || event);
     }
   };
 
@@ -74,7 +174,7 @@ export default function TripsCalendarView({ onSelectTrip }) {
         ) : (
           <CalendarGrid
             currentDate={currentDate}
-            events={events}
+            events={filteredEvents}
             onSelectEvent={handleSelectEvent}
           />
         )}
