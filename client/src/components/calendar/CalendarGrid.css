@@ -1,0 +1,161 @@
+.calendar-grid-container {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+/* Weekday header */
+.calendar-weekdays-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.calendar-weekday-cell {
+  padding: 12px 8px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Day cells matrix */
+.calendar-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background-color: #e2e8f0;
+  gap: 1px; /* Creates clean thin inner borders */
+}
+
+.calendar-day-cell {
+  background-color: #ffffff;
+  min-height: 100px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  transition: background-color var(--transition-fast);
+}
+
+.calendar-day-cell.empty-cell {
+  background-color: #fafbfc;
+}
+
+.calendar-day-number {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+/* Events container within day cell */
+.calendar-events-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.calendar-event-pill {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.calendar-event-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+}
+
+.event-pill-icon {
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.event-pill-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Category Pill Variants */
+.calendar-pill-upcoming {
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+.calendar-pill-upcoming:hover {
+  background-color: #dbeafe;
+}
+
+.calendar-pill-planned {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+.calendar-pill-planned:hover {
+  background-color: #dcfce7;
+}
+
+.calendar-pill-in-progress {
+  background-color: #fefce8;
+  border-color: #fef08a;
+  color: #a16207;
+}
+.calendar-pill-in-progress:hover {
+  background-color: #fef9c3;
+}
+
+.calendar-pill-getaways {
+  background-color: #faf5ff;
+  border-color: #e9d5ff;
+  color: #7e22ce;
+}
+.calendar-pill-getaways:hover {
+  background-color: #f3e8ff;
+}
+
+.calendar-pill-adventures {
+  background-color: #fff7ed;
+  border-color: #fed7aa;
+  color: #c2410c;
+}
+.calendar-pill-adventures:hover {
+  background-color: #ffedd5;
+}
+
+@media (max-width: 768px) {
+  .calendar-day-cell {
+    min-height: 80px;
+    padding: 4px;
+  }
+  .calendar-event-pill {
+    font-size: 0.65rem;
+    padding: 3px 4px;
+  }
+  .calendar-weekday-cell {
+    font-size: 0.68rem;
+    padding: 8px 4px;
+  }
+}

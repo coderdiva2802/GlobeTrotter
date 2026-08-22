@@ -573,4 +573,121 @@ This document specifies the REST API contract for authentication, user profiles,
   - **`200 OK`**
   - **`404 Not Found`**
 
+---
+
+## 6. Trips Calendar View Endpoints
+
+### 6.1 Get Monthly Trip Events
+- **Endpoint:** `GET /trips/calendar`
+- **Description:** Returns all trip events and date ranges for a given month/year to render the calendar view.
+- **Query Parameters:**
+  - `month` (string, optional, default: current month): Format `YYYY-MM` (e.g. `2024-01`).
+  - `category` (string, optional): Filter by event category (`all`, `upcoming`, `planned`, `in-progress`, `getaways`, `adventures`).
+
+#### Responses
+- **`200 OK`**
+```json
+{
+  "success": true,
+  "data": {
+    "month": "2024-01",
+    "monthLabel": "January 2024",
+    "totalEvents": 6,
+    "events": [
+      {
+        "id": 501,
+        "tripId": 101,
+        "title": "Paris Trip",
+        "date": "2024-01-10",
+        "startDate": "2024-01-10",
+        "endDate": "2024-01-14",
+        "category": "upcoming",
+        "categoryLabel": "Upcoming Trips",
+        "color": "#3b82f6",
+        "badgeBg": "#eff6ff",
+        "badgeText": "#1d4ed8",
+        "icon": "plane",
+        "destination": "Paris, France"
+      },
+      {
+        "id": 502,
+        "tripId": 102,
+        "title": "Saris 10",
+        "date": "2024-01-16",
+        "startDate": "2024-01-16",
+        "endDate": "2024-01-20",
+        "category": "planned",
+        "categoryLabel": "Planned",
+        "color": "#22c55e",
+        "badgeBg": "#f0fdf4",
+        "badgeText": "#15803d",
+        "icon": "tent",
+        "destination": "Sar Pass, Himachal Pradesh"
+      },
+      {
+        "id": 503,
+        "tripId": 103,
+        "title": "15 - 22",
+        "date": "2024-01-17",
+        "startDate": "2024-01-15",
+        "endDate": "2024-01-22",
+        "category": "in-progress",
+        "categoryLabel": "In Progress",
+        "color": "#eab308",
+        "badgeBg": "#fefce8",
+        "badgeText": "#a16207",
+        "icon": "calendar",
+        "destination": "Goa Coastal Break"
+      },
+      {
+        "id": 504,
+        "tripId": 104,
+        "title": "NYC Getaway",
+        "date": "2024-01-19",
+        "startDate": "2024-01-19",
+        "endDate": "2024-01-24",
+        "category": "getaways",
+        "categoryLabel": "Getaways",
+        "color": "#a855f7",
+        "badgeBg": "#faf5ff",
+        "badgeText": "#7e22ce",
+        "icon": "building",
+        "destination": "New York, USA"
+      },
+      {
+        "id": 505,
+        "tripId": 105,
+        "title": "Japan Adventure",
+        "date": "2024-01-21",
+        "startDate": "2024-01-21",
+        "endDate": "2024-01-28",
+        "category": "adventures",
+        "categoryLabel": "Adventures",
+        "color": "#f97316",
+        "badgeBg": "#fff7ed",
+        "badgeText": "#c2410c",
+        "icon": "shrine",
+        "destination": "Tokyo & Kyoto, Japan"
+      },
+      {
+        "id": 506,
+        "tripId": 106,
+        "title": "NYC Getaway",
+        "date": "2024-01-29",
+        "startDate": "2024-01-29",
+        "endDate": "2024-02-03",
+        "category": "getaways",
+        "categoryLabel": "Getaways",
+        "color": "#a855f7",
+        "badgeBg": "#faf5ff",
+        "badgeText": "#7e22ce",
+        "icon": "building",
+        "destination": "New York, USA"
+      }
+    ]
+  }
+}
+```
+
+
 

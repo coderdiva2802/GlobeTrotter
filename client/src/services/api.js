@@ -6,6 +6,7 @@ import {
   mockPreplannedTrips,
   mockPreviousTrips,
   mockActivities,
+  mockCalendarTrips,
 } from './mockData.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
@@ -87,6 +88,29 @@ export const apiService = {
         ...mockUser,
         ...profileData,
         name: `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim() || mockUser.name,
+      };
+    }
+  },
+
+  /**
+   * Get calendar trips mapping for a given month
+   */
+  async getCalendarTrips(monthYear = '2024-01', category = 'all') {
+    try {
+      const response = await api.get('/trips/calendar', {
+        params: { month: monthYear, category },
+      });
+      return response.data?.data;
+    } catch {
+      let events = [...mockCalendarTrips];
+      if (category && category !== 'all') {
+        events = events.filter((e) => e.category === category);
+      }
+      return {
+        month: monthYear,
+        monthLabel: 'January 2024',
+        totalEvents: events.length,
+        events,
       };
     }
   },
