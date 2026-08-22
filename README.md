@@ -1,15 +1,18 @@
 # GlobeTrotter 🌍✈️
 
-An AI-powered, personalized travel planning platform built with React, Node.js, Express, PostgreSQL, and Prisma ORM.
+An AI-powered, personalized travel planning and community platform built with React, Node.js, Express, PostgreSQL, and Prisma ORM.
 
 ---
 
 ## 🚀 Features
 
 - **Robust JWT Authentication**: Secure register, login, refresh token rotation, avatar file uploads, and password reset flows.
-- **Dynamic Pexels & Geo Cities Pipeline**: Live destination image fetching via Pexels API with automatic PostgreSQL caching.
-- **Interactive Travel Dashboard**: Continent/regional destination selections, trip filters, search capabilities, and modal details.
-- **Trip & Itinerary Management**: Create and track multi-city journeys with budgets, dates, and traveler counts.
+- **Curated Holiday Packages & Custom Trip Builder**: Instant package setup (Golden Triangle, Kerala, Goa, Dubai, Bali, Japan) with verified inclusions and customizable multi-city stops.
+- **Global Multi-Currency Engine**: Live currency switching and price conversions supporting `INR (₹)`, `USD ($)`, `EUR (€)`, `GBP (£)`, `AED (AED)`, and `JPY (¥)` across all views.
+- **Interactive Day-Wise Itinerary & Budget Optimization**: Live budget utilization progress, over-budget highlighting, non-destructive editing, and shareable public links.
+- **Dynamic Destination Image Pipeline**: Automatic destination-matching cover images and Pexels media caching in PostgreSQL.
+- **Community Forum & Discussion Hub**: Support for community discussion threads (`CommunityPost`), category tagging (`CommunityCategory`), user replies (`CommunityReply`), and thread likes (`CommunityPostLike`).
+- **Trips Management & Filtering**: Search, group by status/destination/year, sort by budget/date/name, and delete customized trips.
 
 ---
 
@@ -20,11 +23,12 @@ An AI-powered, personalized travel planning platform built with React, Node.js, 
 - **Routing:** React Router DOM v7
 - **HTTP Client:** Axios
 - **Icons:** Lucide React
+- **Context API:** `AuthContext` (User authentication), `CurrencyContext` (Global multi-currency conversion)
 
 ### Backend
 - **Runtime:** Node.js (ES Modules)
 - **Framework:** Express 5
-- **ORM:** Prisma v7
+- **ORM:** Prisma v7 (`prisma.config.ts` configuration)
 - **Database:** PostgreSQL (with `@prisma/adapter-pg` driver adapter)
 - **Validation:** Zod
 - **Image Upload:** Multer
@@ -39,17 +43,26 @@ GlobeTrotter/
 ├── client/              # React frontend (Vite)
 │   ├── public/
 │   ├── src/
-│   │   ├── components/  # Layout, Auth, Home, and Modal components
-│   │   ├── context/     # AuthContext & useAuth hook
-│   │   ├── services/    # Axios client & apiService
-│   │   ├── App.jsx
+│   │   ├── components/
+│   │   │   ├── auth/        # ProtectedRoute, AuthLayout, LoginForm, RegisterForm
+│   │   │   ├── common/      # Badge, FloatingPlanButton
+│   │   │   ├── home/        # HeroBanner, SearchFilterBar, RegionalSelections, PreviousTrips, TripCard
+│   │   │   ├── itinerary/   # DayWiseItineraryView, BudgetSummaryBar, DayItineraryCard, ShareTripModal
+│   │   │   ├── layout/      # Navbar (with Currency Selector & Profile Menu)
+│   │   │   ├── modals/      # RegionDetailsModal, TripDetailsModal
+│   │   │   └── wizard/      # CreateTripWizard, Step1TripBasics, Step2ItineraryBuilder, StopCard, ActivitySearchModal, HolidayPackageCard
+│   │   ├── context/         # AuthContext, CurrencyContext, useAuth
+│   │   ├── pages/           # LoginPage, RegisterPage
+│   │   ├── services/        # Axios API service & mockData
+│   │   ├── App.jsx          # Main application dashboard & router
+│   │   ├── App.css          # Design system & responsive styles
 │   │   └── index.css
 │   ├── package.json
 │   └── vite.config.js
 │
 ├── server/              # Express backend
 │   ├── prisma/
-│   │   ├── schema.prisma       # Prisma database schema
+│   │   ├── schema.prisma       # Prisma database schema with Community models
 │   │   ├── seed.js             # User accounts seeder
 │   │   ├── seed-cities.js      # World cities & Pexels images seeder
 │   │   └── migrations/         # SQL migration history
@@ -150,10 +163,14 @@ npm install
 
 ---
 
-### Step 5: Run Database Migrations
-Apply the Prisma migrations to create all required database tables, indexes, and enums:
+### Step 5: Run Database Migrations / Sync Schema
+Apply the Prisma schema to create all required database tables, indexes, enums, and community relations:
 
 ```bash
+# Push schema directly to database:
+npx prisma db push
+
+# Or run migration history:
 npx prisma migrate dev
 ```
 
@@ -269,6 +286,8 @@ The React Vite app will start at `http://localhost:5173`.
 | `/api/v1/destinations/cities/search` | `GET` | No | Search destinations & city autocomplete |
 | `/api/v1/trips/user` | `GET` | **Yes** | Fetch authenticated user's planned & completed trips |
 | `/api/v1/trips` | `POST` | **Yes** | Create a new trip with destination stops & budget |
+| `/api/v1/trips/:id` | `DELETE` | **Yes** | Delete a planned or completed trip |
+| `/api/v1/trips/:id/share` | `POST` | **Yes** | Generate a public shareable trip link |
 
 ---
 
@@ -281,4 +300,5 @@ The React Vite app will start at `http://localhost:5173`.
 | **Activities & Categories** | `Activity`, `ActivityCategory`, `ActivityCategoryOnActivity`, `ActivityImage` | Things to do, pricing, ratings, and categorized activity media |
 | **Trips & Itineraries** | `Trip`, `TripStop`, `TripTransport`, `ItineraryItem` | Multi-city trips, dates, transportation modes, and day-by-day itineraries |
 | **Expenses & Sharing** | `Expense`, `TripShare` | Budget and expense tracking across stops/items, shareable trip links |
+| **Community & Discussions** | `CommunityPost`, `CommunityReply`, `CommunityPostLike`, `CommunityCategory` *(Enum)* | Discussion forums, categorized threads, user comments, and thread likes |
 | **AI & Recommendations** | `RecommendationInteraction`, `TripGeneration` | Interaction history and AI trip generation prompts/snapshots |
