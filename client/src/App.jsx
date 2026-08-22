@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { LayoutGrid, Calendar as CalendarIcon } from 'lucide-react';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { useAuth } from './context/useAuth.js';
 import LoginPage from './pages/LoginPage.jsx';
@@ -12,6 +13,7 @@ import SearchFilterBar from './components/home/SearchFilterBar.jsx';
 import RegionalSelections from './components/home/RegionalSelections.jsx';
 import PreviousTrips from './components/home/PreviousTrips.jsx';
 import HomeActivitiesSection from './components/home/HomeActivitiesSection.jsx';
+import TripsCalendarView from './components/calendar/TripsCalendarView.jsx';
 import FloatingPlanButton from './components/common/FloatingPlanButton.jsx';
 import PlanTripModal from './components/modals/PlanTripModal.jsx';
 import TripDetailsModal from './components/modals/TripDetailsModal.jsx';
@@ -42,6 +44,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const { user: authUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
+  const [tripsViewMode, setTripsViewMode] = useState('cards'); // 'cards' | 'calendar'
   const [userData, setUserData] = useState(null);
   const [regions, setRegions] = useState([]);
   const [trips, setTrips] = useState([]);
@@ -191,7 +194,6 @@ function Dashboard() {
           }
         }}
         user={displayUser}
-        onSearchOpen={() => navigate('/search')}
       />
 
       {/* Main Page Layout */}
@@ -250,8 +252,29 @@ function Dashboard() {
                   All your planned, ongoing, and completed adventures in one place.
                 </p>
               </div>
+
+              {/* View Switcher Toggle: Cards View vs Calendar View */}
+              <div className="trips-view-mode-toggle">
+                <button
+                  type="button"
+                  className={`trips-toggle-btn ${tripsViewMode === 'cards' ? 'active' : ''}`}
+                  onClick={() => setTripsViewMode('cards')}
+                >
+                  <LayoutGrid size={15} />
+                  <span>Cards View</span>
+                </button>
+                <button
+                  type="button"
+                  className={`trips-toggle-btn ${tripsViewMode === 'calendar' ? 'active' : ''}`}
+                  onClick={() => setTripsViewMode('calendar')}
+                >
+                  <CalendarIcon size={15} />
+                  <span>Calendar View</span>
+                </button>
+              </div>
             </div>
 
+            {/* Search & Filter Controls */}
             <SearchFilterBar
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -264,43 +287,73 @@ function Dashboard() {
               onSelectActivity={(act) => setSelectedActivity(act)}
             />
 
-            <PreviousTrips
-              trips={processedTrips}
-              onViewDetails={(trip) => setSelectedTrip(trip)}
-              onViewAll={() => {}}
-              onPlanTrip={() => setIsPlanModalOpen(true)}
-            />
-
-            {/* If no trips found but query is typed, offer activity discovery */}
-            {processedTrips.length === 0 && searchQuery && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  backgroundColor: '#eff6ff',
-                  border: '1px solid #bfdbfe',
-                  borderRadius: 'var(--radius-lg)',
-                  padding: '16px 20px',
-                  marginTop: '12px',
+            {tripsViewMode === 'calendar' ? (
+              /* Calendar View */
+              <TripsCalendarView
+                onSelectTrip={(calTrip) => {
+                  // If trip exists in full trips, open full details modal; otherwise open with calTrip data
+                  const matchingTrip = trips.find((t) => t.id === calTrip.tripId || t.name === calTrip.name) || {
+                    id: calTrip.id,
+                    name: calTrip.name || calTrip.title,
+                    description: calTrip.description || 'Custom planned itinerary on calendar.',
+                    startDate: calTrip.startDate,
+                    endDate: calTrip.endDate,
+                    formattedDates: `${calTrip.startDate} - ${calTrip.endDate}`,
+                    travelerCount: calTrip.travelerCount || 2,
+                    travelerLabel: `${calTrip.travelerCount || 2} Travelers`,
+                    status: (calTrip.category || 'UPCOMING').toUpperCase(),
+                    statusLabel: calTrip.categoryLabel || 'Upcoming',
+                    coverImageUrl: calTrip.coverImageUrl,
+                    locationSummary: calTrip.locationSummary,
+                    stops: calTrip.stops || [{ id: 1, cityName: calTrip.locationSummary || 'Destination', countryName: '', order: 1 }],
+                    budget: calTrip.budget || 25000,
+                    currency: calTrip.currency || 'INR',
+                  };
+                  setSelectedTrip(matchingTrip);
                 }}
-              >
-                <div>
-                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1e3a8a', marginBottom: '2px' }}>
-                    Looking for activities in &ldquo;{searchQuery}&rdquo;?
-                  </h4>
-                  <p style={{ fontSize: '0.82rem', color: '#3b82f6' }}>
-                    Discover top tours, scenic treks, and day trips in {searchQuery}.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="btn-primary"
-                  onClick={() => navigate(`/search?q=${encodeURIComponent(searchQuery)}`)}
-                >
-                  Search Activities in &ldquo;{searchQuery}&rdquo; ➔
-                </button>
-              </div>
+              />
+            ) : (
+              /* Cards View */
+              <>
+                <PreviousTrips
+                  trips={processedTrips}
+                  onViewDetails={(trip) => setSelectedTrip(trip)}
+                  onViewAll={() => {}}
+                  onPlanTrip={() => setIsPlanModalOpen(true)}
+                />
+
+                {/* If no trips found but query is typed, offer activity discovery */}
+                {processedTrips.length === 0 && searchQuery && (
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      backgroundColor: '#eff6ff',
+                      border: '1px solid #bfdbfe',
+                      borderRadius: 'var(--radius-lg)',
+                      padding: '16px 20px',
+                      marginTop: '12px',
+                    }}
+                  >
+                    <div>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1e3a8a', marginBottom: '2px' }}>
+                        Looking for activities in &ldquo;{searchQuery}&rdquo;?
+                      </h4>
+                      <p style={{ fontSize: '0.82rem', color: '#3b82f6' }}>
+                        Discover top tours, scenic treks, and day trips in {searchQuery}.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      onClick={() => navigate(`/search?q=${encodeURIComponent(searchQuery)}`)}
+                    >
+                      Search Activities in &ldquo;{searchQuery}&rdquo; ➔
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </div>
         )}
