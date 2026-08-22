@@ -122,3 +122,18 @@ export const mockTrips = [
     currency: "USD"
   }
 ];
+
+export const mockCities = [
+  { cityId: 1, cityName: "Paris", countryName: "France", displayName: "Paris, France", region: "Europe" },
+  { cityId: 2, cityName: "Tokyo", countryName: "Japan", displayName: "Tokyo, Japan", region: "Asia" },
+  { cityId: 3, cityName: "Rome", countryName: "Italy", displayName: "Rome, Italy", region: "Europe" },
+  { cityId: 4, cityName: "Santorini", countryName: "Greece", displayName: "Santorini, Greece", region: "Europe" },
+  { cityId: 5, cityName: "Malé", countryName: "Maldives", displayName: "Malé, Maldives", region: "Asia" },
+  { cityId: 6, cityName: "New York", countryName: "United States", displayName: "New York, USA", region: "North America" },
+  { cityId: 7, cityName: "Barcelona", countryName: "Spain", displayName: "Barcelona, Spain", region: "Europe" },
+  { cityId: 8, cityName: "Kyoto", countryName: "Japan", displayName: "Kyoto, Japan", region: "Asia" },
+  { cityId: 9, cityName: "Cape Town", countryName: "South Africa", displayName: "Cape Town, South Africa", region: "Africa" },
+  { cityId: 10, cityName: "Buenos Aires", countryName: "Argentina", displayName: "Buenos Aires, Argentina", region: "South America" },
+  { cityId: 11, cityName: "Cairo", countryName: "Egypt", displayName: "Cairo, Egypt", region: "Africa" }
+];
+

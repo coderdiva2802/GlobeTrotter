@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { mockUser, mockRegions, mockTrips } from './mockData.js';
+import { mockUser, mockRegions, mockTrips, mockCities } from './mockData.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -58,6 +58,27 @@ export const apiService = {
     } catch {
       if (status === 'all') return mockTrips;
       return mockTrips.filter((trip) => trip.status.toLowerCase() === status.toLowerCase());
+    }
+  },
+
+  /**
+   * Get city / destination suggestions for autocomplete
+   */
+  async getDestinationSuggestions(query = '') {
+    try {
+      const response = await apiClient.get('/destinations/autocomplete', {
+        params: { q: query },
+      });
+      return response.data.data;
+    } catch {
+      if (!query.trim()) return mockCities;
+      const q = query.toLowerCase();
+      return mockCities.filter(
+        (c) =>
+          c.cityName.toLowerCase().includes(q) ||
+          c.countryName.toLowerCase().includes(q) ||
+          c.displayName.toLowerCase().includes(q)
+      );
     }
   },
 

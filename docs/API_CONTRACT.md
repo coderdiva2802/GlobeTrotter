@@ -257,24 +257,53 @@ Unified search endpoint for destinations, trips, and experiences with filtering,
 
 ---
 
-### 2.5 Trip Creation (Plan a Trip)
+### 2.5 Trip Creation (Plan a Trip Wizard)
 
-#### `POST /api/trips`
-Creates a new travel plan.
+#### `GET /api/destinations/autocomplete`
+Searches for cities and destinations for the "Destination / first stop" dropdown in the trip wizard.
 
-- **Headers:** `Authorization: Bearer <token>`, `Content-Type: application/json`
-- **Request Body**:
+- **Query Parameters:**
+  - `q` *(string, required)*: Partial city or country name (e.g. `"Par"` for Paris, `"Tok"` for Tokyo).
+- **Response `200 OK`**:
 ```json
 {
-  "name": "European Summer Odyssey",
-  "description": "10-day tour across France and Italy",
-  "startDate": "2025-06-15T00:00:00.000Z",
-  "endDate": "2025-06-25T00:00:00.000Z",
-  "travelerCount": 2,
-  "budget": 3500.00,
-  "currency": "USD",
-  "visibility": "PRIVATE",
-  "cityIds": [12, 18]
+  "success": true,
+  "data": [
+    {
+      "cityId": 12,
+      "cityName": "Paris",
+      "countryName": "France",
+      "displayName": "Paris, France",
+      "region": "Île-de-France",
+      "coverImageUrl": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "cityId": 14,
+      "cityName": "Rome",
+      "countryName": "Italy",
+      "displayName": "Rome, Italy",
+      "region": "Lazio",
+      "coverImageUrl": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80"
+    }
+  ]
+}
+```
+
+#### `POST /api/trips`
+Creates a trip from Step 1 of the Trip Creation Wizard.
+
+- **Headers:** `Authorization: Bearer <token>`, `Content-Type: application/json`
+- **Request Body (Step 1 Payload)**:
+```json
+{
+  "name": "Europe Summer Adventure",
+  "firstDestination": "Paris, France",
+  "firstCityId": 12,
+  "startDate": "2025-07-01T00:00:00.000Z",
+  "endDate": "2025-07-15T00:00:00.000Z",
+  "description": "Family sightseeing trip visiting museums, historical landmarks, and French culinary tours.",
+  "isDraft": false,
+  "visibility": "PRIVATE"
 }
 ```
 - **Response `201 Created`**:
@@ -282,12 +311,28 @@ Creates a new travel plan.
 {
   "success": true,
   "data": {
-    "id": 104,
-    "name": "European Summer Odyssey",
-    "startDate": "2025-06-15T00:00:00.000Z",
-    "endDate": "2025-06-25T00:00:00.000Z",
+    "id": 105,
+    "name": "Europe Summer Adventure",
+    "description": "Family sightseeing trip visiting museums, historical landmarks, and French culinary tours.",
+    "startDate": "2025-07-01T00:00:00.000Z",
+    "endDate": "2025-07-15T00:00:00.000Z",
+    "formattedDates": "Jul 1 - Jul 15, 2025",
     "travelerCount": 2,
+    "travelerLabel": "2 Travelers",
     "status": "UPCOMING",
+    "statusLabel": "Upcoming",
+    "locationSummary": "Paris, France",
+    "coverImageUrl": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80",
+    "stops": [
+      {
+        "id": 10,
+        "order": 1,
+        "cityName": "Paris",
+        "countryName": "France",
+        "startDate": "2025-07-01T00:00:00.000Z",
+        "endDate": "2025-07-15T00:00:00.000Z"
+      }
+    ],
     "createdAt": "2025-01-20T10:00:00.000Z"
   }
 }

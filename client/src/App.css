@@ -1311,3 +1311,427 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================================
+   10. Create Trip Wizard (Step 1 of 3)
+   ========================================================================== */
+.wizard-outer-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0 2rem 0;
+}
+
+.wizard-page-container {
+  max-width: 860px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.wizard-top-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.wizard-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.wizard-step-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #4f46e5;
+  text-transform: uppercase;
+}
+
+.wizard-main-heading {
+  font-family: var(--font-heading);
+  font-size: 1.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.wizard-sub-heading {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.wizard-cancel-btn {
+  padding: 0.55rem 1.25rem;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.wizard-cancel-btn:hover {
+  background-color: var(--bg-subtle);
+  border-color: var(--border-hover);
+}
+
+/* Main Card Surface */
+.wizard-card-surface {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: 2.25rem;
+}
+
+.wizard-form-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.wizard-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  position: relative;
+}
+
+.wizard-field-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.wizard-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.wizard-text-input {
+  width: 100%;
+  padding: 0.78rem 2.5rem 0.78rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  color: #0f172a;
+  background-color: #ffffff;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.wizard-text-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.wizard-text-input.has-error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+}
+
+.wizard-input-trailing-icon {
+  position: absolute;
+  right: 0.85rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.wizard-date-trailing-icon {
+  position: absolute;
+  right: 0.85rem;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.wizard-date-input {
+  padding-right: 2.5rem;
+}
+
+.wizard-dates-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.wizard-textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  color: #0f172a;
+  background-color: #ffffff;
+  resize: vertical;
+  min-height: 95px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.wizard-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.wizard-error-text {
+  font-size: 0.78rem;
+  color: #ef4444;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* Dropdown suggestions */
+.wizard-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xl);
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 50;
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.wizard-dropdown-header {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-light);
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0.65rem;
+}
+
+.wizard-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-main);
+  border-radius: var(--radius-sm);
+  text-align: left;
+  transition: background var(--transition-fast);
+}
+
+.wizard-dropdown-item:hover {
+  background-color: var(--bg-subtle);
+}
+
+.wizard-dropdown-item.is-selected {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.dest-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dest-pin-icon {
+  color: var(--primary);
+}
+
+/* Wizard Actions Bar */
+.wizard-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.wizard-btn-secondary {
+  padding: 0.75rem 1.45rem;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #0f172a;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.wizard-btn-secondary:hover {
+  background-color: var(--bg-subtle);
+  border-color: var(--border-hover);
+}
+
+.wizard-btn-primary {
+  padding: 0.75rem 1.65rem;
+  background-color: #5850ec;
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(88, 80, 236, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all var(--transition-fast);
+}
+
+.wizard-btn-primary:hover {
+  background-color: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(88, 80, 236, 0.5);
+}
+
+.btn-sparkle-icon {
+  opacity: 0.9;
+}
+
+.btn-arrow-icon {
+  transition: transform var(--transition-fast);
+}
+
+.wizard-btn-primary:hover .btn-arrow-icon {
+  transform: translateX(3px);
+}
+
+/* Steps 2 & 3 content */
+.wizard-step2-content,
+.wizard-step3-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.stop-card-preview {
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.stop-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--primary);
+  letter-spacing: 0.04em;
+}
+
+.stop-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stop-icon {
+  color: var(--primary);
+}
+
+.stop-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.stop-dates {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.step2-info-banner {
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.88rem;
+  color: #1e40af;
+}
+
+.step2-info-banner .sparkle-icon {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+.review-summary-card {
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.review-trip-name {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.25rem;
+}
+
+.review-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.review-label {
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 140px;
+}
+
+.review-val {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+@media (max-width: 768px) {
+  .wizard-card-surface {
+    padding: 1.5rem;
+  }
+
+  .wizard-dates-row {
+    grid-template-columns: 1fr;
+  }
+
+  .wizard-actions-bar {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .wizard-btn-secondary,
+  .wizard-btn-primary {
+    justify-content: center;
+    width: 100%;
+  }
+}
+

@@ -5,14 +5,14 @@ import SearchFilterBar from './components/home/SearchFilterBar.jsx';
 import RegionalSelections from './components/home/RegionalSelections.jsx';
 import PreviousTrips from './components/home/PreviousTrips.jsx';
 import FloatingPlanButton from './components/common/FloatingPlanButton.jsx';
-import PlanTripModal from './components/modals/PlanTripModal.jsx';
+import CreateTripWizard from './components/wizard/CreateTripWizard.jsx';
 import TripDetailsModal from './components/modals/TripDetailsModal.jsx';
 import RegionDetailsModal from './components/modals/RegionDetailsModal.jsx';
 import { apiService } from './services/api.js';
 import './App.css';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'trips' | 'community' | 'create-trip'
   const [user, setUser] = useState(null);
   const [regions, setRegions] = useState([]);
   const [trips, setTrips] = useState([]);
@@ -23,8 +23,7 @@ export function App() {
   const [activeSort, setActiveSort] = useState('default'); // 'default' | 'title' | 'date'
   const [activeGroupBy, setActiveGroupBy] = useState('none'); // 'none' | 'region' | 'status'
 
-  // Modal States
-  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  // Modal & Wizard States
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
@@ -49,11 +48,23 @@ export function App() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Handle trip creation
-  const handleCreateTrip = async (tripFormData) => {
+  // Handle completed trip creation from wizard
+  const handleWizardComplete = async (tripFormData) => {
     const createdTrip = await apiService.createTrip(tripFormData);
     setTrips((prev) => [createdTrip, ...prev]);
+    setActiveTab('home');
     showToast(`🎉 "${createdTrip.name}" has been created successfully!`);
+  };
+
+  // Handle saving draft from wizard
+  const handleSaveDraft = async (draftData) => {
+    const draftTrip = await apiService.createTrip({
+      ...draftData,
+      name: draftData.name || 'Untitled Draft Trip',
+    });
+    setTrips((prev) => [draftTrip, ...prev]);
+    setActiveTab('home');
+    showToast(`💾 Draft saved: "${draftTrip.name}"`);
   };
 
   // Filter and sort trips
@@ -125,7 +136,7 @@ export function App() {
 
       {/* 1. Header Navigation Bar */}
       <Navbar
-        activeTab={activeTab}
+        activeTab={activeTab === 'create-trip' ? 'trips' : activeTab}
         onTabChange={(tab) => {
           setActiveTab(tab);
           if (tab === 'trips') {
@@ -139,12 +150,20 @@ export function App() {
         }}
       />
 
-      {/* Main Page Layout */}
+      {/* Main Page Content */}
       <main className="main-content">
+        {activeTab === 'create-trip' && (
+          <CreateTripWizard
+            onComplete={handleWizardComplete}
+            onSaveDraft={handleSaveDraft}
+            onCancel={() => setActiveTab('home')}
+          />
+        )}
+
         {activeTab === 'home' && (
           <>
             {/* 2. Canyon Hero Banner */}
-            <HeroBanner onExploreClick={() => setIsPlanModalOpen(true)} />
+            <HeroBanner onExploreClick={() => setActiveTab('create-trip')} />
 
             {/* 3. Search & Filter Bar */}
             <SearchFilterBar
@@ -172,7 +191,7 @@ export function App() {
               trips={processedTrips}
               onViewDetails={(trip) => setSelectedTrip(trip)}
               onViewAll={() => setActiveTab('trips')}
-              onPlanTrip={() => setIsPlanModalOpen(true)}
+              onPlanTrip={() => setActiveTab('create-trip')}
             />
           </>
         )}
@@ -189,7 +208,7 @@ export function App() {
               <button
                 type="button"
                 className="btn-primary"
-                onClick={() => setIsPlanModalOpen(true)}
+                onClick={() => setActiveTab('create-trip')}
               >
                 + New Trip
               </button>
@@ -210,7 +229,7 @@ export function App() {
               trips={processedTrips}
               onViewDetails={(trip) => setSelectedTrip(trip)}
               onViewAll={() => {}}
-              onPlanTrip={() => setIsPlanModalOpen(true)}
+              onPlanTrip={() => setActiveTab('create-trip')}
             />
           </div>
         )}
@@ -235,15 +254,11 @@ export function App() {
       </main>
 
       {/* 6. Floating Action Button: + Plan a trip */}
-      <FloatingPlanButton onClick={() => setIsPlanModalOpen(true)} />
+      {activeTab !== 'create-trip' && (
+        <FloatingPlanButton onClick={() => setActiveTab('create-trip')} />
+      )}
 
-      {/* 7. Modals */}
-      <PlanTripModal
-        isOpen={isPlanModalOpen}
-        onClose={() => setIsPlanModalOpen(false)}
-        onSubmitTrip={handleCreateTrip}
-      />
-
+      {/* 7. Details Modals */}
       <TripDetailsModal
         trip={selectedTrip}
         isOpen={Boolean(selectedTrip)}
@@ -255,7 +270,7 @@ export function App() {
         isOpen={Boolean(selectedRegion)}
         onClose={() => setSelectedRegion(null)}
         onPlanForRegion={() => {
-          setIsPlanModalOpen(true);
+          setActiveTab('create-trip');
         }}
       />
     </div>
