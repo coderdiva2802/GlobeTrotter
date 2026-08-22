@@ -2465,5 +2465,113 @@
   }
 }
 
+/* ==========================================================================
+   14. My Trips Categorized View (Trips Tab)
+   ========================================================================== */
+.my-trips-page-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.my-trips-header-bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.my-trips-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.my-trips-tracking-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #4f46e5;
+  text-transform: uppercase;
+}
+
+.my-trips-main-heading {
+  font-family: var(--font-heading);
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.my-trips-sub-heading {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.my-trips-plan-cta-btn {
+  padding: 0.65rem 1.35rem;
+  background-color: #5850ec;
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(88, 80, 236, 0.35);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all var(--transition-fast);
+}
+
+.my-trips-plan-cta-btn:hover {
+  background-color: #4f46e5;
+  transform: translateY(-1px);
+}
+
+.my-trips-sections-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.trip-status-category-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.trip-status-category-title {
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.trip-status-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .my-trips-header-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .my-trips-plan-cta-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .trip-status-category-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 
 

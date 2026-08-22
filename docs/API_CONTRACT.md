@@ -142,14 +142,80 @@ Fetches curated top regional selections for the home dashboard.
 ### 2.3 User Trips (Dashboard & History)
 
 #### `GET /api/trips/user`
-Fetches trips created by the authenticated user, categorized by status (Completed / Upcoming / Ongoing).
+Fetches trips created by the authenticated user, optionally grouped or categorized by status (Ongoing / Upcoming / Completed).
 
 - **Headers:** `Authorization: Bearer <token>`
 - **Query Parameters:**
-  - `status` *(optional, string)*: `'all'` | `'completed'` | `'upcoming'` | `'ongoing'` (default: `'all'`)
+  - `status` *(optional, string)*: `'all'` | `'ongoing'` | `'upcoming'` | `'completed'` (default: `'all'`)
+  - `groupBy` *(optional, string)*: `'status'` | `'none'` (default: `'none'`)
   - `limit` *(optional, integer)*: Maximum number of trips to return (e.g., `10`)
   - `sort` *(optional, string)*: `'startDate:desc'` | `'startDate:asc'` (default: `'startDate:desc'`)
-- **Response `200 OK`**:
+- **Response `200 OK` (when `groupBy=status`)**:
+```json
+{
+  "success": true,
+  "data": {
+    "ongoing": [
+      {
+        "id": 100,
+        "name": "Japan Adventure",
+        "startDate": "2024-11-10T00:00:00.000Z",
+        "endDate": "2024-11-28T00:00:00.000Z",
+        "formattedDates": "Nov 10 - Nov 28, 2024",
+        "travelerCount": 2,
+        "travelerLabel": "2 Travelers",
+        "status": "ONGOING",
+        "statusLabel": "Ongoing",
+        "coverImageUrl": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80",
+        "locationSummary": "Tokyo, Kyoto, Osaka"
+      }
+    ],
+    "upcoming": [
+      {
+        "id": 103,
+        "name": "Japan Adventure",
+        "startDate": "2024-11-10T00:00:00.000Z",
+        "endDate": "2024-11-28T00:00:00.000Z",
+        "formattedDates": "Nov 10 - Nov 28, 2024",
+        "travelerCount": 2,
+        "travelerLabel": "2 Travelers",
+        "status": "UPCOMING",
+        "statusLabel": "Upcoming",
+        "coverImageUrl": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80",
+        "locationSummary": "Tokyo, Kyoto, Osaka"
+      }
+    ],
+    "completed": [
+      {
+        "id": 101,
+        "name": "Greek Island Escape",
+        "startDate": "2024-05-10T00:00:00.000Z",
+        "endDate": "2024-05-18T00:00:00.000Z",
+        "formattedDates": "May 10 - May 18, 2024",
+        "travelerCount": 2,
+        "travelerLabel": "2 Travelers",
+        "status": "COMPLETED",
+        "statusLabel": "Completed",
+        "coverImageUrl": "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=800&q=80",
+        "locationSummary": "Santorini, Greece"
+      },
+      {
+        "id": 102,
+        "name": "Maldives Getaway",
+        "startDate": "2024-02-20T00:00:00.000Z",
+        "endDate": "2024-02-28T00:00:00.000Z",
+        "formattedDates": "Feb 20 - Feb 28, 2024",
+        "travelerCount": 2,
+        "travelerLabel": "2 Travelers",
+        "status": "COMPLETED",
+        "statusLabel": "Completed",
+        "coverImageUrl": "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=800&q=80",
+        "locationSummary": "Maldives"
+      }
+    ]
+  }
+}
+```
 ```json
 {
   "success": true,

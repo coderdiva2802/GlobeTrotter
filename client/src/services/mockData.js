@@ -63,6 +63,48 @@ export const mockRegions = [
 
 export const mockTrips = [
   {
+    id: 100,
+    name: "Japan Adventure",
+    description: "Currently experiencing Tokyo neon lights, cultural shrines, and vibrant dining.",
+    startDate: "2024-11-10T00:00:00.000Z",
+    endDate: "2024-11-28T00:00:00.000Z",
+    formattedDates: "Nov 10 - Nov 28, 2024",
+    travelerCount: 2,
+    travelerLabel: "2 Travelers",
+    status: "ONGOING",
+    statusLabel: "Ongoing",
+    coverImageUrl: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80",
+    locationSummary: "Tokyo, Kyoto, Osaka",
+    stops: [
+      { id: 10, cityName: "Tokyo", countryName: "Japan", order: 1 },
+      { id: 11, cityName: "Kyoto", countryName: "Japan", order: 2 },
+      { id: 12, cityName: "Osaka", countryName: "Japan", order: 3 }
+    ],
+    budget: 3800,
+    currency: "USD"
+  },
+  {
+    id: 103,
+    name: "Japan Adventure",
+    description: "An upcoming journey through neon Tokyo, sacred Kyoto temples, and Osaka food alleys.",
+    startDate: "2024-11-10T00:00:00.000Z",
+    endDate: "2024-11-28T00:00:00.000Z",
+    formattedDates: "Nov 10 - Nov 28, 2024",
+    travelerCount: 2,
+    travelerLabel: "2 Travelers",
+    status: "UPCOMING",
+    statusLabel: "Upcoming",
+    coverImageUrl: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80",
+    locationSummary: "Tokyo, Kyoto, Osaka",
+    stops: [
+      { id: 3, cityName: "Tokyo", countryName: "Japan", order: 1 },
+      { id: 4, cityName: "Kyoto", countryName: "Japan", order: 2 },
+      { id: 5, cityName: "Osaka", countryName: "Japan", order: 3 }
+    ],
+    budget: 3800,
+    currency: "USD"
+  },
+  {
     id: 101,
     name: "Greek Island Escape",
     description: "Sun-soaked days exploring Cycladic architecture, Aegean sunsets, and coastal dining.",
@@ -98,27 +140,6 @@ export const mockTrips = [
       { id: 2, cityName: "Malé", countryName: "Maldives", order: 1 }
     ],
     budget: 4500,
-    currency: "USD"
-  },
-  {
-    id: 103,
-    name: "Japan Adventure",
-    description: "An unforgettable journey through neon Tokyo, sacred Kyoto temples, and Osaka food alleys.",
-    startDate: "2024-11-10T00:00:00.000Z",
-    endDate: "2024-11-28T00:00:00.000Z",
-    formattedDates: "Nov 10 - Nov 28, 2024",
-    travelerCount: 2,
-    travelerLabel: "2 Travelers",
-    status: "UPCOMING",
-    statusLabel: "Upcoming",
-    coverImageUrl: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80",
-    locationSummary: "Tokyo, Kyoto, Osaka",
-    stops: [
-      { id: 3, cityName: "Tokyo", countryName: "Japan", order: 1 },
-      { id: 4, cityName: "Kyoto", countryName: "Japan", order: 2 },
-      { id: 5, cityName: "Osaka", countryName: "Japan", order: 3 }
-    ],
-    budget: 3800,
     currency: "USD"
   }
 ];

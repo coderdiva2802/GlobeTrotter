@@ -7,6 +7,7 @@ import PreviousTrips from './components/home/PreviousTrips.jsx';
 import FloatingPlanButton from './components/common/FloatingPlanButton.jsx';
 import CreateTripWizard from './components/wizard/CreateTripWizard.jsx';
 import DayWiseItineraryView from './components/itinerary/DayWiseItineraryView.jsx';
+import MyTripsView from './components/trips/MyTripsView.jsx';
 import RegionDetailsModal from './components/modals/RegionDetailsModal.jsx';
 import { apiService } from './services/api.js';
 import './App.css';
@@ -213,44 +214,14 @@ export function App() {
         )}
 
         {activeTab === 'trips' && (
-          <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div className="section-header" style={{ marginBottom: 0 }}>
-              <div>
-                <h2 className="section-title">My Travel Journeys</h2>
-                <p style={{ fontSize: '0.88rem', color: 'var(--text-muted)' }}>
-                  All your planned, ongoing, and completed adventures in one place.
-                </p>
-              </div>
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={() => setActiveTab('create-trip')}
-              >
-                + New Trip
-              </button>
-            </div>
-
-            <SearchFilterBar
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              activeFilter={activeFilter}
-              onFilterChange={setActiveFilter}
-              activeSort={activeSort}
-              onSortChange={setActiveSort}
-              activeGroupBy={activeGroupBy}
-              onGroupByChange={setActiveGroupBy}
-            />
-
-            <PreviousTrips
-              trips={processedTrips}
-              onViewDetails={(trip) => {
-                setActiveItineraryTrip(trip);
-                setActiveTab('itinerary-view');
-              }}
-              onViewAll={() => {}}
-              onPlanTrip={() => setActiveTab('create-trip')}
-            />
-          </div>
+          <MyTripsView
+            trips={trips}
+            onViewTripDetails={(trip) => {
+              setActiveItineraryTrip(trip);
+              setActiveTab('itinerary-view');
+            }}
+            onPlanTrip={() => setActiveTab('create-trip')}
+          />
         )}
 
         {activeTab === 'community' && (
