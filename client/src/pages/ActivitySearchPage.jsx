@@ -6,6 +6,7 @@ import ActivitySearchBar from '../components/search/ActivitySearchBar';
 import ActivityCard from '../components/search/ActivityCard';
 import ActivityDetailsModal from '../components/search/ActivityDetailsModal';
 import { apiService } from '../services/api';
+import { mockActivities } from '../services/mockData';
 import './ActivitySearchPage.css';
 
 export default function ActivitySearchPage() {
@@ -41,7 +42,14 @@ export default function ActivitySearchPage() {
           }),
         ]);
         setCurrentUser(user);
-        setActivitiesList(searchResult?.activities || []);
+        const list = Array.isArray(searchResult)
+          ? searchResult
+          : (searchResult?.activities || []);
+        if (list.length === 0 && !searchQuery.trim()) {
+          setActivitiesList(mockActivities);
+        } else {
+          setActivitiesList(list);
+        }
       } finally {
         setIsLoading(false);
       }

@@ -313,22 +313,46 @@ export const apiService = {
   /**
    * Search activities for a specific city, country, or keyword
    */
-  async searchActivities(destinationName = '', query = '') {
+  async searchActivities(param1 = '', param2 = '') {
+    let destinationName = '';
+    let query = '';
+    let filter = 'all';
+    let sortBy = 'default';
+    let groupBy = 'none';
+
+    if (typeof param1 === 'object' && param1 !== null) {
+      destinationName = param1.destination || param1.destinationName || '';
+      query = param1.query || param1.q || '';
+      filter = param1.filter || 'all';
+      sortBy = param1.sortBy || 'default';
+      groupBy = param1.groupBy || 'none';
+    } else {
+      destinationName = param1 || '';
+      query = param2 || '';
+    }
+
     try {
       const response = await api.get('/activities/search', {
-        params: { destination: destinationName, q: query },
+        params: { destination: destinationName, q: query, filter, sortBy, groupBy },
       });
-      return response.data?.data;
+      const data = response.data?.data;
+      if (Array.isArray(data)) {
+        return { total: data.length, activities: data };
+      }
+      if (data && Array.isArray(data.activities)) {
+        return data;
+      }
+      return { total: mockActivities.length, activities: mockActivities };
     } catch {
-      const destStr = (destinationName || '').trim().toLowerCase();
-      const queryStr = (query || '').trim().toLowerCase();
+      const destStr = typeof destinationName === 'string' ? destinationName.trim().toLowerCase() : '';
+      const queryStr = typeof query === 'string' ? query.trim().toLowerCase() : '';
 
       let matched = [...mockActivities];
 
       if (destStr) {
         matched = matched.filter((act) => {
-          const actCity = (act.cityName || '').toLowerCase();
-          const actCountry = (act.countryName || '').toLowerCase();
+          const actCity = (act.cityName || act.city || '').toLowerCase();
+          const actCountry = (act.countryName || act.country || '').toLowerCase();
 
           return (
             destStr.includes(actCity) ||
@@ -340,17 +364,17 @@ export const apiService = {
 
         if (matched.length === 0) {
           if (destStr.includes('india')) {
-            matched = mockActivities.filter((a) => (a.countryName || '').toLowerCase() === 'india');
+            matched = mockActivities.filter((a) => (a.countryName || a.country || '').toLowerCase() === 'india');
           } else if (destStr.includes('japan')) {
-            matched = mockActivities.filter((a) => (a.countryName || '').toLowerCase() === 'japan');
+            matched = mockActivities.filter((a) => (a.countryName || a.country || '').toLowerCase() === 'japan');
           } else if (destStr.includes('france') || destStr.includes('paris')) {
-            matched = mockActivities.filter((a) => (a.countryName || '').toLowerCase() === 'france');
+            matched = mockActivities.filter((a) => (a.countryName || a.country || '').toLowerCase() === 'france');
           } else if (destStr.includes('dubai') || destStr.includes('uae')) {
-            matched = mockActivities.filter((a) => (a.cityName || '').toLowerCase() === 'dubai');
+            matched = mockActivities.filter((a) => (a.cityName || a.city || '').toLowerCase() === 'dubai');
           } else if (destStr.includes('bali') || destStr.includes('indonesia')) {
-            matched = mockActivities.filter((a) => (a.cityName || '').toLowerCase() === 'bali');
+            matched = mockActivities.filter((a) => (a.cityName || a.city || '').toLowerCase() === 'bali');
           } else if (destStr.includes('italy') || destStr.includes('rome')) {
-            matched = mockActivities.filter((a) => (a.countryName || '').toLowerCase() === 'italy');
+            matched = mockActivities.filter((a) => (a.countryName || a.country || '').toLowerCase() === 'italy');
           }
         }
       }
@@ -358,13 +382,35 @@ export const apiService = {
       if (queryStr) {
         matched = matched.filter(
           (act) =>
-            act.name.toLowerCase().includes(queryStr) ||
+            act.name?.toLowerCase().includes(queryStr) ||
             (act.category && act.category.toLowerCase().includes(queryStr)) ||
-            (act.cityName && act.cityName.toLowerCase().includes(queryStr))
+            (act.cityName && act.cityName.toLowerCase().includes(queryStr)) ||
+            (act.description && act.description.toLowerCase().includes(queryStr))
         );
       }
 
-      return matched;
+      if (filter && filter !== 'all') {
+        const f = filter.toLowerCase();
+        matched = matched.filter(
+          (a) =>
+            (a.category && a.category.toLowerCase().includes(f)) ||
+            (a.badge && a.badge.toLowerCase().replace(/\s+/g, '-') === f) ||
+            (a.difficulty && a.difficulty.toLowerCase() === f)
+        );
+      }
+
+      if (sortBy === 'rating') {
+        matched.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      } else if (sortBy === 'price-low') {
+        matched.sort((a, b) => (a.estimatedCost || a.price || 0) - (b.estimatedCost || b.price || 0));
+      } else if (sortBy === 'price-high') {
+        matched.sort((a, b) => (b.estimatedCost || b.price || 0) - (a.estimatedCost || a.price || 0));
+      }
+
+      return {
+        total: matched.length,
+        activities: matched,
+      };
     }
   },
 
