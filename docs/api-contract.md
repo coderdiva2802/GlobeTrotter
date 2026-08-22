@@ -434,3 +434,143 @@ This document specifies the REST API contract for authentication, user profiles,
 - **`400 Bad Request`** — Validation failed
 - **`401 Unauthorized`** — Missing or expired token
 
+---
+
+## 5. Activity Search & Discovery Endpoints
+
+### 5.1 Search Activities
+- **Endpoint:** `GET /activities/search`
+- **Description:** Search and filter activities, tours, and trek experiences across destinations.
+- **Query Parameters:**
+  - `q` (string, optional): Search keyword (matches activity name, description, city, or country).
+  - `groupBy` (string, optional): Grouping mode (`none`, `location`, `price`, `difficulty`).
+  - `filter` (string, optional): Category filter (`all`, `best-price`, `top-rated`, `lowest-price`, `best-seller`, `new`).
+  - `sortBy` (string, optional): Sort criteria (`default`, `rating`, `price-low`, `price-high`, `duration`).
+  - `minPrice` (number, optional): Minimum price in INR.
+  - `maxPrice` (number, optional): Maximum price in INR.
+  - `cityId` (number, optional): Filter by specific destination city ID.
+
+#### Responses
+- **`200 OK`**
+```json
+{
+  "success": true,
+  "data": {
+    "total": 5,
+    "query": "hi",
+    "activities": [
+      {
+        "id": 301,
+        "name": "Manali Escape",
+        "destination": "Manali, Himachal Pradesh",
+        "cityId": 12,
+        "description": "Mountain views, cafes and a relaxed Himalayan getaway with flexible stays.",
+        "durationDays": 4,
+        "durationLabel": "4 Days",
+        "difficulty": "Easy",
+        "maxGroupSize": 12,
+        "groupSizeLabel": "Max 12",
+        "rating": 4.8,
+        "reviewCount": 412,
+        "price": 8499,
+        "currency": "INR",
+        "formattedPrice": "₹8,499",
+        "badge": "Best Price",
+        "badgeVariant": "blue",
+        "coverImageUrl": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        "id": 302,
+        "name": "Paris Highlights",
+        "destination": "Paris, France",
+        "cityId": 4,
+        "description": "A compact European city break covering classic sights, food and neighborhoods.",
+        "durationDays": 5,
+        "durationLabel": "5 Days",
+        "difficulty": "Easy",
+        "maxGroupSize": 10,
+        "groupSizeLabel": "Max 10",
+        "rating": 4.8,
+        "reviewCount": 603,
+        "price": 49999,
+        "currency": "INR",
+        "formattedPrice": "₹49,999",
+        "badge": "Top Rated",
+        "badgeVariant": "coral",
+        "coverImageUrl": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        "id": 303,
+        "name": "Triund Trek",
+        "destination": "Dharamshala, Himachal Pradesh",
+        "cityId": 14,
+        "description": "A short trek offering stunning Dhauladhar views and a simple mountain-camp experience.",
+        "durationDays": 2,
+        "durationLabel": "2 Days",
+        "difficulty": "Easy",
+        "maxGroupSize": 15,
+        "groupSizeLabel": "Max 15",
+        "rating": 4.6,
+        "reviewCount": 128,
+        "price": 1499,
+        "currency": "INR",
+        "formattedPrice": "₹1,499",
+        "badge": "Lowest Price",
+        "badgeVariant": "teal",
+        "coverImageUrl": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        "id": 304,
+        "name": "Hampta Pass Trek",
+        "destination": "Manali, Himachal Pradesh",
+        "cityId": 12,
+        "description": "Experience the dramatic change from lush valleys to high-altitude barren landscapes.",
+        "durationDays": 5,
+        "durationLabel": "5 Days",
+        "difficulty": "Moderate",
+        "maxGroupSize": 12,
+        "groupSizeLabel": "Max 12",
+        "rating": 4.8,
+        "reviewCount": 256,
+        "price": 6999,
+        "currency": "INR",
+        "formattedPrice": "₹6,999",
+        "badge": "Best Seller",
+        "badgeVariant": "green",
+        "coverImageUrl": "https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        "id": 305,
+        "name": "Kheerganga Trek",
+        "destination": "Kullu, Himachal Pradesh",
+        "cityId": 16,
+        "description": "A scenic trek to natural hot springs in the Parvati Valley.",
+        "durationDays": 3,
+        "durationLabel": "3 Days",
+        "difficulty": "Moderate",
+        "maxGroupSize": 10,
+        "groupSizeLabel": "Max 10",
+        "rating": 4.5,
+        "reviewCount": 98,
+        "price": 2399,
+        "currency": "INR",
+        "formattedPrice": "₹2,399",
+        "badge": "New",
+        "badgeVariant": "purple",
+        "coverImageUrl": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### 5.2 Get Activity Details
+- **Endpoint:** `GET /activities/:id`
+- **Description:** Returns full itinerary breakdown, inclusions, exclusions, and guide details for an activity.
+- **Responses:**
+  - **`200 OK`**
+  - **`404 Not Found`**
+
+

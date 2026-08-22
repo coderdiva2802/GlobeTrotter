@@ -5,15 +5,18 @@ import { useAuth } from './context/useAuth.js';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
+import ActivitySearchPage from './pages/ActivitySearchPage.jsx';
 import Navbar from './components/layout/Navbar.jsx';
 import HeroBanner from './components/home/HeroBanner.jsx';
 import SearchFilterBar from './components/home/SearchFilterBar.jsx';
 import RegionalSelections from './components/home/RegionalSelections.jsx';
 import PreviousTrips from './components/home/PreviousTrips.jsx';
+import HomeActivitiesSection from './components/home/HomeActivitiesSection.jsx';
 import FloatingPlanButton from './components/common/FloatingPlanButton.jsx';
 import PlanTripModal from './components/modals/PlanTripModal.jsx';
 import TripDetailsModal from './components/modals/TripDetailsModal.jsx';
 import RegionDetailsModal from './components/modals/RegionDetailsModal.jsx';
+import ActivityDetailsModal from './components/search/ActivityDetailsModal.jsx';
 import { apiService } from './services/api.js';
 import './App.css';
 
@@ -42,6 +45,7 @@ function Dashboard() {
   const [userData, setUserData] = useState(null);
   const [regions, setRegions] = useState([]);
   const [trips, setTrips] = useState([]);
+  const [activities, setActivities] = useState([]);
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,22 +57,25 @@ function Dashboard() {
   const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [selectedRegion, setSelectedRegion] = useState(null);
+  const [selectedActivity, setSelectedActivity] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
   // Load initial data
   useEffect(() => {
     async function loadData() {
-      const [fetchedUser, regionsData, tripsData] = await Promise.all([
+      const [fetchedUser, regionsData, tripsData, activitiesData] = await Promise.all([
         apiService.getCurrentUser(),
         apiService.getRegions(),
         apiService.getUserTrips(),
+        apiService.searchActivities({ query: searchQuery }),
       ]);
       setUserData(fetchedUser);
       setRegions(regionsData);
       setTrips(tripsData);
+      setActivities(activitiesData?.activities || []);
     }
     loadData();
-  }, []);
+  }, [searchQuery]);
 
   // Format active user profile display
   const displayUser = useMemo(() => {
@@ -174,6 +181,8 @@ function Dashboard() {
         onTabChange={(tab) => {
           if (tab === 'profile') {
             navigate('/profile');
+          } else if (tab === 'search' || tab === 'activities') {
+            navigate('/search');
           } else {
             setActiveTab(tab);
             if (tab === 'trips') {
@@ -182,10 +191,7 @@ function Dashboard() {
           }
         }}
         user={displayUser}
-        onSearchOpen={() => {
-          const input = document.querySelector('.search-input');
-          if (input) input.focus();
-        }}
+        onSearchOpen={() => navigate('/search')}
       />
 
       {/* Main Page Layout */}
@@ -195,7 +201,7 @@ function Dashboard() {
             {/* 2. Canyon Hero Banner */}
             <HeroBanner onExploreClick={() => setIsPlanModalOpen(true)} />
 
-            {/* 3. Search & Filter Bar */}
+            {/* 3. Search & Filter Bar with Live Suggestions Dropdown (Option 2) */}
             <SearchFilterBar
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -205,6 +211,7 @@ function Dashboard() {
               onSortChange={setActiveSort}
               activeGroupBy={activeGroupBy}
               onGroupByChange={setActiveGroupBy}
+              onSelectActivity={(act) => setSelectedActivity(act)}
             />
 
             {/* 4. Top Regional Selections */}
@@ -216,7 +223,15 @@ function Dashboard() {
               }}
             />
 
-            {/* 5. Previous Trips Section */}
+            {/* 5. Matching Activities & Treks Section on Home (Option 1) */}
+            <HomeActivitiesSection
+              activities={activities}
+              searchQuery={searchQuery}
+              onViewAll={() => navigate(searchQuery ? `/search?q=${encodeURIComponent(searchQuery)}` : '/search')}
+              onViewActivity={(act) => setSelectedActivity(act)}
+            />
+
+            {/* 6. Previous Trips Section */}
             <PreviousTrips
               trips={processedTrips}
               onViewDetails={(trip) => setSelectedTrip(trip)}
@@ -246,6 +261,7 @@ function Dashboard() {
               onSortChange={setActiveSort}
               activeGroupBy={activeGroupBy}
               onGroupByChange={setActiveGroupBy}
+              onSelectActivity={(act) => setSelectedActivity(act)}
             />
 
             <PreviousTrips
@@ -254,6 +270,38 @@ function Dashboard() {
               onViewAll={() => {}}
               onPlanTrip={() => setIsPlanModalOpen(true)}
             />
+
+            {/* If no trips found but query is typed, offer activity discovery */}
+            {processedTrips.length === 0 && searchQuery && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  backgroundColor: '#eff6ff',
+                  border: '1px solid #bfdbfe',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '16px 20px',
+                  marginTop: '12px',
+                }}
+              >
+                <div>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1e3a8a', marginBottom: '2px' }}>
+                    Looking for activities in &ldquo;{searchQuery}&rdquo;?
+                  </h4>
+                  <p style={{ fontSize: '0.82rem', color: '#3b82f6' }}>
+                    Discover top tours, scenic treks, and day trips in {searchQuery}.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => navigate(`/search?q=${encodeURIComponent(searchQuery)}`)}
+                >
+                  Search Activities in &ldquo;{searchQuery}&rdquo; ➔
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -285,10 +333,10 @@ function Dashboard() {
         )}
       </main>
 
-      {/* 6. Floating Action Button: + Plan a trip */}
+      {/* Floating Action Button: + Plan a trip */}
       <FloatingPlanButton onClick={() => setIsPlanModalOpen(true)} />
 
-      {/* 7. Modals */}
+      {/* Modals */}
       <PlanTripModal
         isOpen={isPlanModalOpen}
         onClose={() => setIsPlanModalOpen(false)}
@@ -308,6 +356,13 @@ function Dashboard() {
         onPlanForRegion={() => {
           setIsPlanModalOpen(true);
         }}
+      />
+
+      <ActivityDetailsModal
+        activity={selectedActivity}
+        isOpen={Boolean(selectedActivity)}
+        onClose={() => setSelectedActivity(null)}
+        onAddToTrip={(act) => showToast(`✅ "${act.name}" added to your itinerary!`)}
       />
     </div>
   );
@@ -336,6 +391,15 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/search"
+            element={
+              <ProtectedRoute>
+                <ActivitySearchPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/activities" element={<Navigate to="/search" replace />} />
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

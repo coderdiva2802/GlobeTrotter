@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Globe, Home, Compass, Users, Search, LogOut, User as UserIcon } from 'lucide-react';
+import { Globe, Home, Briefcase, Compass, Users, LogOut, User as UserIcon } from 'lucide-react';
 import { useAuth } from '../../context/useAuth.js';
 
-export const Navbar = ({ activeTab, onTabChange, user, onSearchOpen }) => {
+export const Navbar = ({ activeTab, onTabChange, user }) => {
   const { logout } = useAuth();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const menuRef = useRef(null);
@@ -45,9 +45,19 @@ export const Navbar = ({ activeTab, onTabChange, user, onSearchOpen }) => {
             className={`nav-link-btn ${activeTab === 'trips' ? 'active' : ''}`}
             onClick={() => onTabChange('trips')}
           >
-            <Compass size={17} className="nav-icon" />
+            <Briefcase size={17} className="nav-icon" />
             <span>Trips</span>
             {activeTab === 'trips' && <div className="active-indicator" />}
+          </button>
+
+          <button
+            type="button"
+            className={`nav-link-btn ${activeTab === 'search' || activeTab === 'activities' ? 'active' : ''}`}
+            onClick={() => onTabChange('search')}
+          >
+            <Compass size={17} className="nav-icon" />
+            <span>Activities</span>
+            {(activeTab === 'search' || activeTab === 'activities') && <div className="active-indicator" />}
           </button>
 
           <button
@@ -61,18 +71,8 @@ export const Navbar = ({ activeTab, onTabChange, user, onSearchOpen }) => {
           </button>
         </nav>
 
-        {/* Right Section: Search and User Avatar */}
+        {/* Right Section: User Profile Avatar */}
         <div className="navbar-actions">
-          <button
-            type="button"
-            className="icon-btn search-trigger-btn"
-            onClick={onSearchOpen}
-            aria-label="Search"
-            title="Quick Search"
-          >
-            <Search size={19} />
-          </button>
-
           <div className="dropdown-wrapper" ref={menuRef}>
             <div
               className="user-profile-pill"

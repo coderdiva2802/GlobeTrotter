@@ -59,6 +59,8 @@ export default function ProfilePage() {
       navigate('/dashboard');
     } else if (tab === 'community') {
       navigate('/dashboard');
+    } else if (tab === 'search' || tab === 'activities') {
+      navigate('/search');
     }
   };
 
@@ -76,7 +78,7 @@ export default function ProfilePage() {
         activeTab="profile"
         onTabChange={handleTabChange}
         user={userProfile}
-        onSearchOpen={() => navigate('/dashboard')}
+        onSearchOpen={() => navigate('/search')}
       />
 
       {/* Main Profile Content Area */}

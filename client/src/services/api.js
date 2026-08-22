@@ -1,5 +1,12 @@
 import axios from 'axios';
-import { mockUser, mockRegions, mockTrips, mockPreplannedTrips, mockPreviousTrips } from './mockData.js';
+import {
+  mockUser,
+  mockRegions,
+  mockTrips,
+  mockPreplannedTrips,
+  mockPreviousTrips,
+  mockActivities,
+} from './mockData.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
@@ -81,6 +88,92 @@ export const apiService = {
         ...profileData,
         name: `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim() || mockUser.name,
       };
+    }
+  },
+
+  /**
+   * Search activities and tours with query, filtering, sorting, and grouping
+   */
+  async searchActivities({
+    query = '',
+    filter = 'all',
+    sortBy = 'default',
+    groupBy = 'none',
+    minPrice,
+    maxPrice,
+  } = {}) {
+    try {
+      const response = await api.get('/activities/search', {
+        params: {
+          q: query,
+          filter,
+          sortBy,
+          groupBy,
+          minPrice,
+          maxPrice,
+        },
+      });
+      return response.data?.data;
+    } catch {
+      let results = [...mockActivities];
+
+      // Text query match (name, destination, description, city, country)
+      if (query.trim()) {
+        const q = query.toLowerCase().trim();
+        results = results.filter(
+          (a) =>
+            a.name.toLowerCase().includes(q) ||
+            a.destination.toLowerCase().includes(q) ||
+            a.description.toLowerCase().includes(q) ||
+            (a.city && a.city.toLowerCase().includes(q)) ||
+            (a.state && a.state.toLowerCase().includes(q))
+        );
+      }
+
+      // Filter by badge / category
+      if (filter && filter !== 'all') {
+        results = results.filter(
+          (a) => a.badge?.toLowerCase().replace(/\s+/g, '-') === filter.toLowerCase() ||
+                 a.difficulty?.toLowerCase() === filter.toLowerCase()
+        );
+      }
+
+      // Price filter
+      if (minPrice !== undefined) {
+        results = results.filter((a) => a.price >= minPrice);
+      }
+      if (maxPrice !== undefined) {
+        results = results.filter((a) => a.price <= maxPrice);
+      }
+
+      // Sort
+      if (sortBy === 'rating') {
+        results.sort((a, b) => b.rating - a.rating);
+      } else if (sortBy === 'price-low') {
+        results.sort((a, b) => a.price - b.price);
+      } else if (sortBy === 'price-high') {
+        results.sort((a, b) => b.price - a.price);
+      } else if (sortBy === 'duration') {
+        results.sort((a, b) => a.durationDays - b.durationDays);
+      }
+
+      return {
+        total: results.length,
+        query,
+        activities: results,
+      };
+    }
+  },
+
+  /**
+   * Get activity details by ID
+   */
+  async getActivityById(id) {
+    try {
+      const response = await api.get(`/activities/${id}`);
+      return response.data?.data;
+    } catch {
+      return mockActivities.find((a) => a.id === Number(id)) || mockActivities[0];
     }
   },
 
