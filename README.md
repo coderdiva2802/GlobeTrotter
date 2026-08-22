@@ -93,7 +93,7 @@ cp .env.example .env
 Copy-Item .env.example .env
 ```
 
-Open `.env` and set your `DATABASE_URL` with your PostgreSQL credentials:
+Open `.env` and set your `DATABASE_URL`, JWT secrets, and `PEXELS_API_KEY`:
 
 ```env
 DATABASE_URL="postgresql://<USER>:<PASSWORD>@localhost:5432/globetrotter_db?schema=public"
@@ -103,9 +103,11 @@ CLIENT_URL="http://localhost:5173"
 
 JWT_ACCESS_SECRET="your_secure_access_secret_key"
 JWT_REFRESH_SECRET="your_secure_refresh_secret_key"
+
+PEXELS_API_KEY="your_pexels_api_key_here"
 ```
 
-> **Note:** Replace `<USER>` and `<PASSWORD>` with your actual PostgreSQL username and password (e.g., `postgres:password`).
+> **Note:** Replace `<USER>` and `<PASSWORD>` with your actual PostgreSQL username and password (e.g., `postgres:password`). Get a free `PEXELS_API_KEY` from [Pexels API Portal](https://www.pexels.com/api/) to enable dynamic destination photo fetching.
 
 ---
 
@@ -134,11 +136,6 @@ Apply all migrations to create the tables, indexes, and enums in your PostgreSQL
 npx prisma migrate dev --name initial_schema
 ```
 
-> **Alternative (for rapid prototyping without migration files):**
-> ```bash
-> npx prisma db push
-> ```
-
 ---
 
 ### 7. Generate Prisma Client
@@ -150,15 +147,13 @@ npx prisma generate
 
 ---
 
-### 8. Seed the Database with Testing Accounts
-To populate your database with pre-configured test user accounts for testing login, registration, and user roles:
+### 8. Seed Database with Accounts & World Destinations
+Populate your database with pre-configured test user accounts, world cities, and Pexels travel images:
 
 ```bash
 # Inside server/ directory:
-npm run seed
-
-# Or using Prisma CLI:
-npx prisma db seed
+npm run seed                    # Seeds test user accounts
+npm run seed:cities             # Seeds world destinations & fetches Pexels images into PostgreSQL
 ```
 
 ---

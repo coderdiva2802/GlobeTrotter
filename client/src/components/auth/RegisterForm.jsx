@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import FormInput from '../common/FormInput';
 import AvatarUpload from './AvatarUpload';
@@ -8,6 +8,7 @@ import './RegisterForm.css';
 
 export default function RegisterForm() {
   const { register, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -94,6 +95,9 @@ export default function RegisterForm() {
         type: 'success',
         message: 'Account registered successfully! Welcome to GlobeTrotter.',
       });
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 400);
     } else {
       setToast({
         type: 'error',
