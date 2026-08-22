@@ -60,18 +60,20 @@ export const SearchFilterBar = ({
           <div className="dropdown-wrapper">
             <button
               type="button"
-              className={`filter-pill-btn ${activeGroupBy !== 'none' ? 'is-active' : ''} ${
+              className={`filter-pill-btn ${activeGroupBy && activeGroupBy !== 'none' ? 'is-active' : ''} ${
                 openDropdown === 'group' ? 'is-open' : ''
               }`}
               onClick={() => toggleDropdown('group')}
             >
               <Layers size={16} />
-              <span>Group by</span>
+              <span>
+                {activeGroupBy === 'status' ? 'Group: Status' : activeGroupBy === 'destination' ? 'Group: Destination' : activeGroupBy === 'year' ? 'Group: Year' : 'Group by'}
+              </span>
             </button>
 
             {openDropdown === 'group' && (
               <div className="dropdown-menu animate-fade-in">
-                <div className="dropdown-header">Group destinations</div>
+                <div className="dropdown-header">Group Destinations</div>
                 <button
                   type="button"
                   className={`dropdown-item ${activeGroupBy === 'none' ? 'selected' : ''}`}
@@ -80,19 +82,8 @@ export const SearchFilterBar = ({
                     setOpenDropdown(null);
                   }}
                 >
-                  <span>None</span>
+                  <span>None (Flat View)</span>
                   {activeGroupBy === 'none' && <Check size={14} />}
-                </button>
-                <button
-                  type="button"
-                  className={`dropdown-item ${activeGroupBy === 'region' ? 'selected' : ''}`}
-                  onClick={() => {
-                    onGroupByChange('region');
-                    setOpenDropdown(null);
-                  }}
-                >
-                  <span>By Region</span>
-                  {activeGroupBy === 'region' && <Check size={14} />}
                 </button>
                 <button
                   type="button"
@@ -105,6 +96,28 @@ export const SearchFilterBar = ({
                   <span>By Trip Status</span>
                   {activeGroupBy === 'status' && <Check size={14} />}
                 </button>
+                <button
+                  type="button"
+                  className={`dropdown-item ${activeGroupBy === 'destination' ? 'selected' : ''}`}
+                  onClick={() => {
+                    onGroupByChange('destination');
+                    setOpenDropdown(null);
+                  }}
+                >
+                  <span>By Destination</span>
+                  {activeGroupBy === 'destination' && <Check size={14} />}
+                </button>
+                <button
+                  type="button"
+                  className={`dropdown-item ${activeGroupBy === 'year' ? 'selected' : ''}`}
+                  onClick={() => {
+                    onGroupByChange('year');
+                    setOpenDropdown(null);
+                  }}
+                >
+                  <span>By Year</span>
+                  {activeGroupBy === 'year' && <Check size={14} />}
+                </button>
               </div>
             )}
           </div>
@@ -113,13 +126,15 @@ export const SearchFilterBar = ({
           <div className="dropdown-wrapper">
             <button
               type="button"
-              className={`filter-pill-btn ${activeFilter !== 'all' ? 'is-active' : ''} ${
+              className={`filter-pill-btn ${activeFilter && activeFilter !== 'all' ? 'is-active' : ''} ${
                 openDropdown === 'filter' ? 'is-open' : ''
               }`}
               onClick={() => toggleDropdown('filter')}
             >
               <SlidersHorizontal size={16} />
-              <span>Filter</span>
+              <span>
+                {activeFilter === 'upcoming' ? 'Upcoming' : activeFilter === 'completed' ? 'Completed' : activeFilter === 'ongoing' ? 'Ongoing' : 'Filter'}
+              </span>
             </button>
 
             {openDropdown === 'filter' && (
@@ -138,17 +153,6 @@ export const SearchFilterBar = ({
                 </button>
                 <button
                   type="button"
-                  className={`dropdown-item ${activeFilter === 'completed' ? 'selected' : ''}`}
-                  onClick={() => {
-                    onFilterChange('completed');
-                    setOpenDropdown(null);
-                  }}
-                >
-                  <span>Completed Trips</span>
-                  {activeFilter === 'completed' && <Check size={14} />}
-                </button>
-                <button
-                  type="button"
                   className={`dropdown-item ${activeFilter === 'upcoming' ? 'selected' : ''}`}
                   onClick={() => {
                     onFilterChange('upcoming');
@@ -158,6 +162,28 @@ export const SearchFilterBar = ({
                   <span>Upcoming Trips</span>
                   {activeFilter === 'upcoming' && <Check size={14} />}
                 </button>
+                <button
+                  type="button"
+                  className={`dropdown-item ${activeFilter === 'ongoing' ? 'selected' : ''}`}
+                  onClick={() => {
+                    onFilterChange('ongoing');
+                    setOpenDropdown(null);
+                  }}
+                >
+                  <span>Ongoing Trips</span>
+                  {activeFilter === 'ongoing' && <Check size={14} />}
+                </button>
+                <button
+                  type="button"
+                  className={`dropdown-item ${activeFilter === 'completed' ? 'selected' : ''}`}
+                  onClick={() => {
+                    onFilterChange('completed');
+                    setOpenDropdown(null);
+                  }}
+                >
+                  <span>Completed Trips</span>
+                  {activeFilter === 'completed' && <Check size={14} />}
+                </button>
               </div>
             )}
           </div>
@@ -166,13 +192,15 @@ export const SearchFilterBar = ({
           <div className="dropdown-wrapper">
             <button
               type="button"
-              className={`filter-pill-btn ${activeSort !== 'default' ? 'is-active' : ''} ${
+              className={`filter-pill-btn ${activeSort && activeSort !== 'default' && activeSort !== 'date' ? 'is-active' : ''} ${
                 openDropdown === 'sort' ? 'is-open' : ''
               }`}
               onClick={() => toggleDropdown('sort')}
             >
               <ArrowUpDown size={16} />
-              <span>Sort by</span>
+              <span>
+                {activeSort === 'title' ? 'Name (A-Z)' : activeSort === 'budget_high' ? 'Budget: High-Low' : activeSort === 'budget_low' ? 'Budget: Low-High' : activeSort === 'date_latest' ? 'Date: Latest' : 'Sort by'}
+              </span>
             </button>
 
             {openDropdown === 'sort' && (
@@ -180,14 +208,25 @@ export const SearchFilterBar = ({
                 <div className="dropdown-header">Sort Order</div>
                 <button
                   type="button"
-                  className={`dropdown-item ${activeSort === 'default' ? 'selected' : ''}`}
+                  className={`dropdown-item ${activeSort === 'date' || activeSort === 'default' ? 'selected' : ''}`}
                   onClick={() => {
-                    onSortChange('default');
+                    onSortChange('date');
                     setOpenDropdown(null);
                   }}
                 >
-                  <span>Default (Newest)</span>
-                  {activeSort === 'default' && <Check size={14} />}
+                  <span>Date (Earliest first)</span>
+                  {(activeSort === 'date' || activeSort === 'default') && <Check size={14} />}
+                </button>
+                <button
+                  type="button"
+                  className={`dropdown-item ${activeSort === 'date_latest' ? 'selected' : ''}`}
+                  onClick={() => {
+                    onSortChange('date_latest');
+                    setOpenDropdown(null);
+                  }}
+                >
+                  <span>Date (Latest first)</span>
+                  {activeSort === 'date_latest' && <Check size={14} />}
                 </button>
                 <button
                   type="button"
@@ -202,14 +241,25 @@ export const SearchFilterBar = ({
                 </button>
                 <button
                   type="button"
-                  className={`dropdown-item ${activeSort === 'date' ? 'selected' : ''}`}
+                  className={`dropdown-item ${activeSort === 'budget_high' ? 'selected' : ''}`}
                   onClick={() => {
-                    onSortChange('date');
+                    onSortChange('budget_high');
                     setOpenDropdown(null);
                   }}
                 >
-                  <span>Date (Earliest first)</span>
-                  {activeSort === 'date' && <Check size={14} />}
+                  <span>Budget (High to Low)</span>
+                  {activeSort === 'budget_high' && <Check size={14} />}
+                </button>
+                <button
+                  type="button"
+                  className={`dropdown-item ${activeSort === 'budget_low' ? 'selected' : ''}`}
+                  onClick={() => {
+                    onSortChange('budget_low');
+                    setOpenDropdown(null);
+                  }}
+                >
+                  <span>Budget (Low to High)</span>
+                  {activeSort === 'budget_low' && <Check size={14} />}
                 </button>
               </div>
             )}

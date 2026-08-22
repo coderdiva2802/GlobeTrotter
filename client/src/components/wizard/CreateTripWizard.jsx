@@ -1,43 +1,75 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Step1TripBasics } from './Step1TripBasics.jsx';
 import { Step2ItineraryBuilder } from './Step2ItineraryBuilder.jsx';
-import { CheckCircle, ArrowLeft } from 'lucide-react';
 
-export const CreateTripWizard = ({ onComplete, onCancel, onSaveDraft }) => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [tripData, setTripData] = useState({
-    name: 'Europe Summer Adventure',
-    destination: 'Paris, France',
-    cityId: 1,
-    startDate: '2025-06-10',
-    endDate: '2025-06-20',
-    description: 'Scenic road trip and cultural tour across Europe',
-    stops: [
-      {
-        id: 1,
-        cityName: 'Paris',
-        dateRange: '10 Jun - 13 Jun',
-        budget: 40000,
-        notes: 'Museums, cafés and city highlights',
-      },
-      {
-        id: 2,
-        cityName: 'Amsterdam',
-        dateRange: '13 Jun - 16 Jun',
-        budget: 35000,
-        notes: 'Canals, culture and local food',
-      },
-      {
-        id: 3,
-        cityName: 'Berlin',
-        dateRange: '16 Jun - 20 Jun',
-        budget: 45000,
-        notes: 'History, architecture and nightlife',
-      },
-    ],
-    travelerCount: 2,
-    budget: 120000,
+export const CreateTripWizard = ({
+  initialTripData = null,
+  initialStep = 1,
+  onComplete,
+  onCancel,
+  onSaveDraft,
+}) => {
+  const [currentStep, setCurrentStep] = useState(initialStep || 1);
+
+  const [tripData, setTripData] = useState(() => {
+    if (initialTripData) {
+      const travelers = Number(initialTripData.travelerCount) || 2;
+      const totalBudget = Number(initialTripData.budget) || 50000;
+      return {
+        id: initialTripData.id || null,
+        name: initialTripData.name || 'Personalized Travel Journey',
+        destination: initialTripData.locationSummary || initialTripData.destination || 'Jaipur, India',
+        cityId: initialTripData.cityId || null,
+        startDate: initialTripData.startDate ? initialTripData.startDate.split('T')[0] : new Date().toISOString().split('T')[0],
+        endDate: initialTripData.endDate ? initialTripData.endDate.split('T')[0] : new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
+        description: initialTripData.description || '',
+        stops: initialTripData.stops ? initialTripData.stops.map((s) => ({ ...s })) : [],
+        presetStops: initialTripData.stops ? initialTripData.stops.map((s) => ({ ...s })) : null,
+        travelerCount: travelers,
+        budgetPerPerson: Math.round(totalBudget / travelers),
+        budget: totalBudget,
+        coverImageUrl: initialTripData.coverImageUrl || '',
+      };
+    }
+
+    return {
+      name: 'Golden Triangle Heritage Odyssey',
+      destination: 'Delhi • Agra • Jaipur, India',
+      cityId: 104,
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(Date.now() + 6 * 86400000).toISOString().split('T')[0],
+      description: 'Explore the royal soul of India spanning Delhi monuments, Taj Mahal sunrise, and Pink City forts.',
+      stops: [],
+      travelerCount: 2,
+      budgetPerPerson: 24999,
+      budget: 49998,
+      coverImageUrl: 'https://images.unsplash.com/photo-1564507592333-c60657eea523?auto=format&fit=crop&w=800&q=80',
+    };
   });
+
+  // Sync state if initialTripData changes
+  useEffect(() => {
+    if (initialTripData) {
+      const travelers = Number(initialTripData.travelerCount) || 2;
+      const totalBudget = Number(initialTripData.budget) || 50000;
+      setTripData({
+        id: initialTripData.id || null,
+        name: initialTripData.name || 'Personalized Travel Journey',
+        destination: initialTripData.locationSummary || initialTripData.destination || 'Jaipur, India',
+        cityId: initialTripData.cityId || null,
+        startDate: initialTripData.startDate ? initialTripData.startDate.split('T')[0] : new Date().toISOString().split('T')[0],
+        endDate: initialTripData.endDate ? initialTripData.endDate.split('T')[0] : new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
+        description: initialTripData.description || '',
+        stops: initialTripData.stops ? initialTripData.stops.map((s) => ({ ...s })) : [],
+        presetStops: initialTripData.stops ? initialTripData.stops.map((s) => ({ ...s })) : null,
+        travelerCount: travelers,
+        budgetPerPerson: Math.round(totalBudget / travelers),
+        budget: totalBudget,
+        coverImageUrl: initialTripData.coverImageUrl || '',
+      });
+      setCurrentStep(initialStep || 2);
+    }
+  }, [initialTripData, initialStep]);
 
   const handleStep1Continue = (step1Data) => {
     setTripData((prev) => ({
@@ -49,27 +81,32 @@ export const CreateTripWizard = ({ onComplete, onCancel, onSaveDraft }) => {
 
   const handleStep2SaveAndContinue = (updatedStops) => {
     const totalBudget = updatedStops.reduce((acc, s) => acc + (Number(s.budget) || 0), 0);
-    const stopsSummary = updatedStops.map((s) => s.cityName).filter(Boolean).join(', ');
+    const stopsSummary = updatedStops.map((s) => s.cityName).filter(Boolean).join(' → ');
 
     const completePayload = {
-      name: tripData.name || 'Europe Summer Adventure',
-      locationSummary: stopsSummary || tripData.destination || 'Paris, Amsterdam, Berlin',
-      startDate: tripData.startDate || '2025-06-10',
-      endDate: tripData.endDate || '2025-06-20',
+      id: tripData.id || Date.now(),
+      name: tripData.name || 'Personalized Travel Journey',
+      locationSummary: stopsSummary || tripData.destination || 'India',
+      startDate: tripData.startDate,
+      endDate: tripData.endDate,
       description: tripData.description,
-      travelerCount: tripData.travelerCount || 2,
-      budget: totalBudget || 120000,
+      travelerCount: Number(tripData.travelerCount) || 2,
+      budget: totalBudget || tripData.budget || 50000,
       currency: 'INR',
       stops: updatedStops.map((s, idx) => ({
         id: s.id || idx + 1,
         cityName: s.cityName,
-        countryName: '',
+        countryName: s.countryName || '',
         order: idx + 1,
         dateRange: s.dateRange,
-        budget: s.budget,
+        budgetPerPerson: Number(s.budgetPerPerson) || (Number(s.budget) ? Math.round(Number(s.budget) / (Number(tripData.travelerCount) || 2)) : 0),
+        budget: Number(s.budget) || 0,
         notes: s.notes,
+        selectedActivities: (s.selectedActivities || []).map((a) => ({ ...a })),
       })),
-      coverImageUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80',
+      coverImageUrl:
+        tripData.coverImageUrl ||
+        'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?auto=format&fit=crop&w=800&q=80',
     };
 
     onComplete(completePayload);
@@ -94,73 +131,11 @@ export const CreateTripWizard = ({ onComplete, onCancel, onSaveDraft }) => {
 
       {currentStep === 2 && (
         <Step2ItineraryBuilder
-          initialStops={tripData.stops}
+          initialStops={tripData.stops && tripData.stops.length > 0 ? tripData.stops : tripData.presetStops}
           tripBasics={tripData}
           onBack={() => setCurrentStep(1)}
           onSaveAndContinue={handleStep2SaveAndContinue}
-          onSearchPlaces={() => {
-            alert('Search places enabled! You can also click "Search & add activities" on each stop.');
-          }}
         />
-      )}
-
-      {currentStep === 3 && (
-        <div className="wizard-page-container animate-fade-in">
-          <div className="wizard-top-header">
-            <div className="wizard-title-group">
-              <span className="wizard-step-label">STEP 3 OF 3</span>
-              <h1 className="wizard-main-heading">Confirm & Launch Trip</h1>
-              <p className="wizard-sub-heading">
-                Review your journey summary and generate your live interactive itinerary.
-              </p>
-            </div>
-            <button
-              type="button"
-              className="wizard-cancel-btn"
-              onClick={onCancel}
-            >
-              Cancel
-            </button>
-          </div>
-
-          <div className="wizard-card-surface">
-            <div className="wizard-step3-content">
-              <div className="review-summary-card">
-                <h3 className="review-trip-name">{tripData.name}</h3>
-                <div className="review-row">
-                  <span className="review-label">Stops:</span>
-                  <span className="review-val">
-                    {tripData.stops?.map((s) => s.cityName).join(' → ')}
-                  </span>
-                </div>
-                <div className="review-row">
-                  <span className="review-label">Travel Window:</span>
-                  <span className="review-val">{tripData.startDate} to {tripData.endDate}</span>
-                </div>
-              </div>
-
-              <div className="wizard-actions-bar">
-                <button
-                  type="button"
-                  className="wizard-btn-secondary"
-                  onClick={() => setCurrentStep(2)}
-                >
-                  <ArrowLeft size={16} />
-                  <span>Back</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="wizard-btn-primary"
-                  onClick={() => handleStep2SaveAndContinue(tripData.stops)}
-                >
-                  <CheckCircle size={16} />
-                  <span>Generate Trip Itinerary</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );

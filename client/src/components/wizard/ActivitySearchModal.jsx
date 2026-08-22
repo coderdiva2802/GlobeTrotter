@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
-import { X, Search, Clock, Star, Plus, Check } from 'lucide-react';
+import { X, Search, Clock, Star, Plus, Check, MapPin, Tag } from 'lucide-react';
 import { apiService } from '../../services/api.js';
+import { useCurrency } from '../../context/CurrencyContext.jsx';
+
+const categories = [
+  'All',
+  'Heritage & Culture',
+  'Sightseeing',
+  'Adventure & Nature',
+  'Food & Nightlife',
+];
 
 export const ActivitySearchModal = ({
   isOpen,
@@ -9,7 +18,9 @@ export const ActivitySearchModal = ({
   onSelectActivity,
   selectedActivities = [],
 }) => {
+  const { formatPrice } = useCurrency();
   const [query, setQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -18,18 +29,24 @@ export const ActivitySearchModal = ({
     async function fetchActivities() {
       setLoading(true);
       const results = await apiService.searchActivities(cityName, query);
-      setActivities(results);
+
+      // Filter by category if not 'All'
+      const filtered = selectedCategory === 'All'
+        ? results
+        : results.filter((a) => a.category.toLowerCase() === selectedCategory.toLowerCase());
+
+      setActivities(filtered);
       setLoading(false);
     }
     fetchActivities();
-  }, [isOpen, cityName, query]);
+  }, [isOpen, cityName, query, selectedCategory]);
 
   if (!isOpen) return null;
 
   return (
     <div className="modal-backdrop animate-fade-in" onClick={onClose}>
       <div
-        className="modal-container activity-search-modal-container"
+        className="activity-search-modal-container"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -38,8 +55,12 @@ export const ActivitySearchModal = ({
         <div className="modal-header">
           <div className="modal-title-group">
             <div>
+              <div className="modal-location-tag">
+                <MapPin size={13} />
+                <span>{cityName || 'Selected Destination'}</span>
+              </div>
               <h2 className="modal-title">Search Activities in {cityName || 'Destination'}</h2>
-              <p className="modal-subtitle">Pick curated sights, tours, and culinary experiences</p>
+              <p className="modal-subtitle">Pick curated sights, tours, and culinary experiences tailored for this location</p>
             </div>
           </div>
           <button
@@ -58,24 +79,50 @@ export const ActivitySearchModal = ({
           <input
             type="text"
             className="activity-search-input"
-            placeholder="Search museums, tours, food, landmarks..."
+            placeholder={`Search forts, temples, tours, safaris in ${cityName || 'destination'}...`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoFocus
           />
+          {query && (
+            <button
+              type="button"
+              className="search-clear-btn"
+              onClick={() => setQuery('')}
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
+
+        {/* Category Filter Pills */}
+        <div className="activity-category-filter-row">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              className={`act-cat-pill ${selectedCategory === cat ? 'active' : ''}`}
+              onClick={() => setSelectedCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
         {/* Activity List */}
         <div className="activity-modal-list">
           {loading ? (
-            <div className="activity-loading-state">Finding top recommendations...</div>
+            <div className="activity-loading-state">Finding top attractions & experiences...</div>
           ) : activities.length > 0 ? (
             activities.map((act) => {
               const isSelected = selectedActivities.some((a) => a.id === act.id || a.name === act.name);
               return (
                 <div key={act.id} className="activity-item-card">
                   <div className="activity-item-info">
-                    <div className="activity-category-pill">{act.category}</div>
+                    <div className="activity-category-pill">
+                      <Tag size={11} style={{ marginRight: '4px' }} />
+                      {act.category}
+                    </div>
                     <h4 className="activity-item-title">{act.name}</h4>
                     <div className="activity-item-meta">
                       <span className="act-meta">
@@ -85,7 +132,7 @@ export const ActivitySearchModal = ({
                         <Star size={13} className="star-icon" /> {act.rating}
                       </span>
                       <span className="act-meta cost-meta">
-                        ₹{Number(act.estimatedCost).toLocaleString('en-IN')}
+                        {formatPrice(act.estimatedCost)}
                       </span>
                     </div>
                   </div>
@@ -111,12 +158,20 @@ export const ActivitySearchModal = ({
               );
             })
           ) : (
-            <div className="activity-empty-state">No activities found matching "{query}"</div>
+            <div className="activity-empty-state">
+              <p>No activities found in <strong>{cityName}</strong> matching your search.</p>
+              <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
+                Tip: Try clearing your search keyword or switching category filters.
+              </span>
+            </div>
           )}
         </div>
 
         {/* Footer */}
         <div className="activity-modal-footer">
+          <div className="activity-footer-count">
+            <span>{selectedActivities.length} {selectedActivities.length === 1 ? 'activity' : 'activities'} selected</span>
+          </div>
           <button
             type="button"
             className="btn-primary"

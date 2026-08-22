@@ -1,4 +1,8 @@
+import { useCurrency } from '../../context/CurrencyContext.jsx';
+
 export const DayItineraryCard = ({ day }) => {
+  const { formatPrice } = useCurrency();
+
   return (
     <div className="day-itinerary-card animate-fade-in">
       {/* Day Card Header */}
@@ -23,7 +27,7 @@ export const DayItineraryCard = ({ day }) => {
               <span className="col-time schedule-time-val">{item.time}</span>
               <span className="col-activity schedule-act-val">{item.activityName}</span>
               <span className="col-expense schedule-expense-val">
-                {item.expenseFormatted || (item.expense === 0 ? 'Free' : `₹${Number(item.expense).toLocaleString('en-IN')}`)}
+                {item.expense === 0 ? 'Free' : formatPrice(item.expense)}
               </span>
             </div>
           ))}

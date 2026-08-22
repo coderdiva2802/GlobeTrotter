@@ -1,54 +1,46 @@
 import { useState, useEffect, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext.jsx';
-import { useAuth } from './context/useAuth.js';
+import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { CurrencyProvider } from './context/CurrencyContext.jsx';
+import { ProtectedRoute } from './components/auth/ProtectedRoute.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
-import Navbar from './components/layout/Navbar.jsx';
-import HeroBanner from './components/home/HeroBanner.jsx';
-import SearchFilterBar from './components/home/SearchFilterBar.jsx';
-import RegionalSelections from './components/home/RegionalSelections.jsx';
-import PreviousTrips from './components/home/PreviousTrips.jsx';
-import FloatingPlanButton from './components/common/FloatingPlanButton.jsx';
-import CreateTripWizard from './components/wizard/CreateTripWizard.jsx';
-import DayWiseItineraryView from './components/itinerary/DayWiseItineraryView.jsx';
-import RegionDetailsModal from './components/modals/RegionDetailsModal.jsx';
+
+import { Navbar } from './components/layout/Navbar.jsx';
+import { HeroBanner } from './components/home/HeroBanner.jsx';
+import { SearchFilterBar } from './components/home/SearchFilterBar.jsx';
+import { RegionalSelections } from './components/home/RegionalSelections.jsx';
+import { PreviousTrips } from './components/home/PreviousTrips.jsx';
+import { FloatingPlanButton } from './components/common/FloatingPlanButton.jsx';
+import { RegionDetailsModal } from './components/modals/RegionDetailsModal.jsx';
+
+// Itinerary and Wizard Components
+import { CreateTripWizard } from './components/wizard/CreateTripWizard.jsx';
+import { DayWiseItineraryView } from './components/itinerary/DayWiseItineraryView.jsx';
+
 import { apiService } from './services/api.js';
 import './App.css';
 
-function ProtectedRoute({ children }) {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: 'var(--text-muted)', fontWeight: 600 }}>Loading GlobeTrotter...</p>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
-}
-
 function Dashboard() {
   const { user: authUser, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState('home');
+  // Navigation & View States
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'trips' | 'community' | 'create-trip' | 'itinerary-view'
+
+  // Data States
   const [userData, setUserData] = useState(null);
   const [regions, setRegions] = useState([]);
   const [trips, setTrips] = useState([]);
 
-  // Search & Filter State
+  // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'completed' | 'upcoming'
-  const [activeSort, setActiveSort] = useState('default'); // 'default' | 'title' | 'date'
-  const [activeGroupBy, setActiveGroupBy] = useState('none'); // 'none' | 'region' | 'status'
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'upcoming' | 'ongoing' | 'completed'
+  const [activeSort, setActiveSort] = useState('date'); // 'date' | 'date_latest' | 'title' | 'budget_high' | 'budget_low'
+  const [activeGroupBy, setActiveGroupBy] = useState('none'); // 'none' | 'status' | 'destination' | 'year'
 
   // Selected & Modal States
   const [activeItineraryTrip, setActiveItineraryTrip] = useState(null);
+  const [editingTrip, setEditingTrip] = useState(null);
+  const [wizardInitialStep, setWizardInitialStep] = useState(1);
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
@@ -91,13 +83,46 @@ function Dashboard() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
+  // Start new trip
+  const handleStartNewTrip = () => {
+    setEditingTrip(null);
+    setWizardInitialStep(1);
+    setActiveTab('create-trip');
+  };
+
+  // Handle editing itinerary without losing data
+  const handleEditItinerary = (tripToEdit, startStep = 2) => {
+    setEditingTrip(tripToEdit || activeItineraryTrip);
+    setWizardInitialStep(startStep);
+    setActiveTab('create-trip');
+  };
+
+  // Handle deleting a trip
+  const handleDeleteTrip = async (tripId) => {
+    await apiService.deleteTrip(tripId);
+    setTrips((prev) => prev.filter((t) => t.id !== tripId));
+    if (activeItineraryTrip?.id === tripId) {
+      setActiveItineraryTrip(null);
+    }
+    showToast('Trip deleted successfully');
+  };
+
   // Handle completed trip creation from wizard -> navigate to Itinerary View
   const handleWizardComplete = async (tripFormData) => {
     const createdTrip = await apiService.createTrip(tripFormData);
-    setTrips((prev) => [createdTrip, ...prev]);
+    setTrips((prev) => {
+      const existingIdx = prev.findIndex((t) => t.id === createdTrip.id);
+      if (existingIdx >= 0) {
+        const updated = [...prev];
+        updated[existingIdx] = createdTrip;
+        return updated;
+      }
+      return [createdTrip, ...prev];
+    });
     setActiveItineraryTrip(createdTrip);
+    setEditingTrip(null);
     setActiveTab('itinerary-view');
-    showToast(`🎉 "${createdTrip.name}" itinerary created!`);
+    showToast(`🎉 "${createdTrip.name}" itinerary updated!`);
   };
 
   // Handle saving draft from wizard
@@ -107,6 +132,7 @@ function Dashboard() {
       name: draftData.name || 'Untitled Draft Trip',
     });
     setTrips((prev) => [draftTrip, ...prev]);
+    setEditingTrip(null);
     setActiveTab('home');
     showToast(`💾 Draft saved: "${draftTrip.name}"`);
   };
@@ -137,7 +163,13 @@ function Dashboard() {
     if (activeSort === 'title') {
       result.sort((a, b) => a.name.localeCompare(b.name));
     } else if (activeSort === 'date') {
-      result.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+      result.sort((a, b) => new Date(a.startDate || 0) - new Date(b.startDate || 0));
+    } else if (activeSort === 'date_latest') {
+      result.sort((a, b) => new Date(b.startDate || 0) - new Date(a.startDate || 0));
+    } else if (activeSort === 'budget_high') {
+      result.sort((a, b) => (Number(b.budget) || 0) - (Number(a.budget) || 0));
+    } else if (activeSort === 'budget_low') {
+      result.sort((a, b) => (Number(a.budget) || 0) - (Number(b.budget) || 0));
     }
 
     return result;
@@ -158,43 +190,32 @@ function Dashboard() {
     <div className="app-layout">
       {/* Toast Notification */}
       {toastMessage && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '1.25rem',
-            right: '1.25rem',
-            zIndex: 999,
-            backgroundColor: '#0f172a',
-            color: '#ffffff',
-            padding: '0.75rem 1.25rem',
-            borderRadius: 'var(--radius-md)',
-            boxShadow: 'var(--shadow-xl)',
-            fontSize: '0.88rem',
-            fontWeight: 600,
-            animation: 'fadeIn 0.25s ease-out',
-          }}
-        >
-          {toastMessage}
+        <div className="toast-notification animate-fade-in">
+          <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* 1. Header Navigation Bar */}
+      {/* 1. Header / Navbar with Currency Switcher */}
       <Navbar
-        activeTab={
-          activeTab === 'create-trip' || activeTab === 'itinerary-view'
-            ? 'trips'
-            : activeTab
-        }
+        user={displayUser}
+        activeTab={activeTab}
         onTabChange={(tab) => {
-          setActiveTab(tab);
-          if (tab === 'trips') {
-            setActiveFilter('all');
+          if (tab === 'create-trip') {
+            handleStartNewTrip();
+          } else {
+            setActiveTab(tab);
           }
         }}
-        user={displayUser}
-        onSearchOpen={() => {
-          const input = document.querySelector('.search-input');
-          if (input) input.focus();
+        onSearchClick={() => {
+          const searchInput = document.querySelector('.search-input');
+          if (searchInput) searchInput.focus();
+        }}
+        onProfileClick={() => {
+          showToast(`Logged in as ${displayUser?.name || 'Traveler'}`);
+        }}
+        onLogoutClick={() => {
+          logout();
+          showToast('You have been logged out.');
         }}
       />
 
@@ -203,23 +224,28 @@ function Dashboard() {
         {activeTab === 'itinerary-view' && (
           <DayWiseItineraryView
             trip={activeItineraryTrip}
-            onEditItinerary={() => setActiveTab('create-trip')}
+            onEditItinerary={(trip) => handleEditItinerary(trip, 2)}
             onBackToDashboard={() => setActiveTab('home')}
           />
         )}
 
         {activeTab === 'create-trip' && (
           <CreateTripWizard
+            initialTripData={editingTrip}
+            initialStep={wizardInitialStep}
             onComplete={handleWizardComplete}
             onSaveDraft={handleSaveDraft}
-            onCancel={() => setActiveTab('home')}
+            onCancel={() => {
+              setEditingTrip(null);
+              setActiveTab(activeItineraryTrip ? 'itinerary-view' : 'home');
+            }}
           />
         )}
 
         {activeTab === 'home' && (
           <>
             {/* 2. Canyon Hero Banner */}
-            <HeroBanner onExploreClick={() => setActiveTab('create-trip')} />
+            <HeroBanner onExploreClick={handleStartNewTrip} />
 
             {/* 3. Search & Filter Bar */}
             <SearchFilterBar
@@ -245,12 +271,14 @@ function Dashboard() {
             {/* 5. Previous Trips Section */}
             <PreviousTrips
               trips={processedTrips}
+              activeGroupBy={activeGroupBy}
               onViewDetails={(trip) => {
                 setActiveItineraryTrip(trip);
                 setActiveTab('itinerary-view');
               }}
+              onDeleteTrip={handleDeleteTrip}
               onViewAll={() => setActiveTab('trips')}
-              onPlanTrip={() => setActiveTab('create-trip')}
+              onPlanTrip={handleStartNewTrip}
             />
           </>
         )}
@@ -267,7 +295,7 @@ function Dashboard() {
               <button
                 type="button"
                 className="btn-primary"
-                onClick={() => setActiveTab('create-trip')}
+                onClick={handleStartNewTrip}
               >
                 + New Trip
               </button>
@@ -286,12 +314,16 @@ function Dashboard() {
 
             <PreviousTrips
               trips={processedTrips}
+              activeGroupBy={activeGroupBy}
+              sectionTitle={`All Trips (${processedTrips.length})`}
+              hideHeader={false}
               onViewDetails={(trip) => {
                 setActiveItineraryTrip(trip);
                 setActiveTab('itinerary-view');
               }}
+              onDeleteTrip={handleDeleteTrip}
               onViewAll={() => {}}
-              onPlanTrip={() => setActiveTab('create-trip')}
+              onPlanTrip={handleStartNewTrip}
             />
           </div>
         )}
@@ -326,7 +358,7 @@ function Dashboard() {
 
       {/* 6. Floating Action Button: + Plan a trip */}
       {activeTab !== 'create-trip' && activeTab !== 'itinerary-view' && (
-        <FloatingPlanButton onClick={() => setActiveTab('create-trip')} />
+        <FloatingPlanButton onClick={handleStartNewTrip} />
       )}
 
       {/* 7. Region Details Modal */}
@@ -335,7 +367,7 @@ function Dashboard() {
         isOpen={Boolean(selectedRegion)}
         onClose={() => setSelectedRegion(null)}
         onPlanForRegion={() => {
-          setActiveTab('create-trip');
+          handleStartNewTrip();
         }}
       />
     </div>
@@ -345,22 +377,24 @@ function Dashboard() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </BrowserRouter>
+      <CurrencyProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </CurrencyProvider>
     </AuthProvider>
   );
 }
