@@ -6,5 +6,6 @@ const router = Router();
 router.get('/regions', getRegions);
 router.get('/cities/search', searchDestinations);
 router.get('/search', searchDestinations);
+router.get('/activities/search', searchDestinations);
 
 export default router;

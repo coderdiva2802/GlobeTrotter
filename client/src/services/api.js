@@ -51,6 +51,8 @@ export const apiService = {
    * Get current authenticated user profile
    */
   async getCurrentUser() {
+    const token = localStorage.getItem('gt_access_token') || localStorage.getItem('token');
+    if (!token) return mockUser;
     try {
       const response = await api.get('/auth/me');
       return response.data?.data?.user || response.data?.data || mockUser;
@@ -134,6 +136,11 @@ export const apiService = {
    * Get trips for current user with optional status filter
    */
   async getUserTrips(status = 'all') {
+    const token = localStorage.getItem('gt_access_token') || localStorage.getItem('token');
+    if (!token) {
+      if (status === 'all') return mockTrips;
+      return mockTrips.filter((trip) => trip.status.toLowerCase() === status.toLowerCase());
+    }
     try {
       const response = await api.get('/trips/user', {
         params: { status },

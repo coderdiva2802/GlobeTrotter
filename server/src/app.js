@@ -22,6 +22,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 // API v1 Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/destinations', destinationRoutes);
+app.use('/api/v1/activities', destinationRoutes);
 app.use('/api/v1/search', destinationRoutes);
 app.use('/api/v1/trips', tripRoutes);
 

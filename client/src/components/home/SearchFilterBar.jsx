@@ -52,24 +52,33 @@ export const SearchFilterBar = ({
     if (!searchQuery || !searchQuery.trim()) return null;
     const q = searchQuery.toLowerCase().trim();
 
-    const matchingActivities = mockActivities.filter(
-      (a) =>
-        a.name.toLowerCase().includes(q) ||
-        a.destination.toLowerCase().includes(q) ||
-        a.description.toLowerCase().includes(q)
-    ).slice(0, 3);
+    const matchingActivities = (mockActivities || [])
+      .filter((a) => {
+        if (!a) return false;
+        const name = (a.name || '').toLowerCase();
+        const dest = (a.destination || a.cityName || '').toLowerCase();
+        const desc = (a.description || '').toLowerCase();
+        return name.includes(q) || dest.includes(q) || desc.includes(q);
+      })
+      .slice(0, 3);
 
-    const matchingRegions = mockRegions.filter(
-      (r) =>
-        r.name.toLowerCase().includes(q) ||
-        r.description.toLowerCase().includes(q)
-    ).slice(0, 2);
+    const matchingRegions = (mockRegions || [])
+      .filter((r) => {
+        if (!r) return false;
+        const name = (r.name || '').toLowerCase();
+        const desc = (r.description || '').toLowerCase();
+        return name.includes(q) || desc.includes(q);
+      })
+      .slice(0, 2);
 
-    const matchingTrips = mockTrips.filter(
-      (t) =>
-        t.name.toLowerCase().includes(q) ||
-        t.locationSummary.toLowerCase().includes(q)
-    ).slice(0, 2);
+    const matchingTrips = (mockTrips || [])
+      .filter((t) => {
+        if (!t) return false;
+        const name = (t.name || '').toLowerCase();
+        const loc = (t.locationSummary || '').toLowerCase();
+        return name.includes(q) || loc.includes(q);
+      })
+      .slice(0, 2);
 
     const totalCount =
       matchingActivities.length + matchingRegions.length + matchingTrips.length;
@@ -368,7 +377,7 @@ export const SearchFilterBar = ({
                     </div>
                   </div>
                   <div className="suggestion-item-price">
-                    {act.formattedPrice || `₹${act.price.toLocaleString('en-IN')}`}
+                    {act.formattedPrice || (act.price != null && !isNaN(Number(act.price)) ? `₹${Number(act.price).toLocaleString('en-IN')}` : '₹2,499')}
                   </div>
                 </div>
               ))}
