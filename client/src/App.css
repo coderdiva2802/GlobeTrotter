@@ -1735,3 +1735,349 @@
   }
 }
 
+/* ==========================================================================
+   11. Step 2 Itinerary Builder & Stop Cards
+   ========================================================================== */
+.wizard-search-places-btn {
+  padding: 0.55rem 1.25rem;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all var(--transition-fast);
+}
+
+.wizard-search-places-btn:hover {
+  background-color: var(--bg-subtle);
+  border-color: var(--border-hover);
+}
+
+.itinerary-stops-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.itinerary-stop-card {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: 1.65rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  transition: box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.itinerary-stop-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: #cbd5e1;
+}
+
+.stop-card-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stop-card-index-title {
+  font-family: var(--font-heading);
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: #3b82f6;
+  letter-spacing: -0.01em;
+}
+
+.stop-card-three-cols {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 1rem;
+}
+
+.stop-field-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.stop-field-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.stop-input {
+  width: 100%;
+  padding: 0.72rem 0.95rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  color: #0f172a;
+  background-color: #ffffff;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.stop-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.stop-card-notes-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.stop-textarea {
+  width: 100%;
+  padding: 0.75rem 0.95rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  color: #0f172a;
+  background-color: #ffffff;
+  resize: vertical;
+  min-height: 68px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.stop-textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+.stop-card-footer-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.25rem;
+}
+
+.stop-search-act-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #4f46e5;
+  transition: gap var(--transition-fast);
+}
+
+.stop-search-act-link:hover {
+  text-decoration: underline;
+  gap: 0.55rem;
+}
+
+.stop-remove-btn {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #dc2626;
+  transition: opacity var(--transition-fast);
+}
+
+.stop-remove-btn:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+/* Centered Add Another Stop Button */
+.add-stop-center-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem 0;
+}
+
+.add-another-stop-dashed-btn {
+  padding: 0.75rem 1.65rem;
+  background-color: #ffffff;
+  border: 1.5px dashed #cbd5e1;
+  border-radius: var(--radius-lg);
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.add-another-stop-dashed-btn:hover {
+  background-color: var(--bg-subtle);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.step2-actions-bar {
+  margin-top: 0.5rem;
+}
+
+/* ==========================================================================
+   12. Activity Search Modal
+   ========================================================================== */
+.activity-search-modal-container {
+  max-width: 620px;
+}
+
+.activity-modal-search-box {
+  padding: 1rem 1.5rem 0.5rem 1.5rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.activity-search-icon {
+  position: absolute;
+  left: 2.25rem;
+  color: var(--text-light);
+  pointer-events: none;
+}
+
+.activity-search-input {
+  width: 100%;
+  padding: 0.72rem 1rem 0.72rem 2.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 0.92rem;
+  color: #0f172a;
+  background-color: var(--bg-subtle);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.activity-search-input:focus {
+  background-color: #ffffff;
+  border-color: var(--primary);
+}
+
+.activity-modal-list {
+  padding: 0.5rem 1.5rem 1.25rem 1.5rem;
+  max-height: 380px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.activity-item-card {
+  background-color: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.95rem 1.15rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: all var(--transition-fast);
+}
+
+.activity-item-card:hover {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: var(--shadow-sm);
+}
+
+.activity-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.activity-category-pill {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--primary);
+  letter-spacing: 0.03em;
+}
+
+.activity-item-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.activity-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.act-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.star-icon {
+  color: #eab308;
+  fill: #eab308;
+}
+
+.cost-meta {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.activity-add-btn {
+  padding: 0.45rem 0.95rem;
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #0f172a;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all var(--transition-fast);
+}
+
+.activity-add-btn:hover {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border-color: #c7d2fe;
+}
+
+.activity-add-btn.added {
+  background-color: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+
+.activity-empty-state,
+.activity-loading-state {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.activity-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .stop-card-three-cols {
+    grid-template-columns: 1fr;
+  }
+
+  .itinerary-stop-card {
+    padding: 1.25rem;
+  }
+}
+
+

@@ -299,8 +299,8 @@ Creates a trip from Step 1 of the Trip Creation Wizard.
   "name": "Europe Summer Adventure",
   "firstDestination": "Paris, France",
   "firstCityId": 12,
-  "startDate": "2025-07-01T00:00:00.000Z",
-  "endDate": "2025-07-15T00:00:00.000Z",
+  "startDate": "2025-06-10T00:00:00.000Z",
+  "endDate": "2025-06-20T00:00:00.000Z",
   "description": "Family sightseeing trip visiting museums, historical landmarks, and French culinary tours.",
   "isDraft": false,
   "visibility": "PRIVATE"
@@ -313,28 +313,110 @@ Creates a trip from Step 1 of the Trip Creation Wizard.
   "data": {
     "id": 105,
     "name": "Europe Summer Adventure",
-    "description": "Family sightseeing trip visiting museums, historical landmarks, and French culinary tours.",
-    "startDate": "2025-07-01T00:00:00.000Z",
-    "endDate": "2025-07-15T00:00:00.000Z",
-    "formattedDates": "Jul 1 - Jul 15, 2025",
+    "startDate": "2025-06-10T00:00:00.000Z",
+    "endDate": "2025-06-20T00:00:00.000Z",
+    "formattedDates": "Jun 10 - Jun 20, 2025",
     "travelerCount": 2,
-    "travelerLabel": "2 Travelers",
     "status": "UPCOMING",
-    "statusLabel": "Upcoming",
-    "locationSummary": "Paris, France",
-    "coverImageUrl": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80",
-    "stops": [
-      {
-        "id": 10,
-        "order": 1,
-        "cityName": "Paris",
-        "countryName": "France",
-        "startDate": "2025-07-01T00:00:00.000Z",
-        "endDate": "2025-07-15T00:00:00.000Z"
-      }
-    ],
     "createdAt": "2025-01-20T10:00:00.000Z"
   }
+}
+```
+
+#### `PUT /api/trips/:id/stops`
+Saves or updates multi-stop itineraries from Step 2 of the Trip Wizard ("Build your itinerary").
+
+- **Headers:** `Authorization: Bearer <token>`, `Content-Type: application/json`
+- **Request Body (Step 2 Multi-Stop Payload)**:
+```json
+{
+  "stops": [
+    {
+      "order": 1,
+      "cityName": "Paris",
+      "cityId": 1,
+      "startDate": "2025-06-10T00:00:00.000Z",
+      "endDate": "2025-06-13T00:00:00.000Z",
+      "formattedDates": "10 Jun - 13 Jun",
+      "budget": 40000,
+      "currency": "INR",
+      "notes": "Museums, cafés and city highlights"
+    },
+    {
+      "order": 2,
+      "cityName": "Amsterdam",
+      "cityId": 12,
+      "startDate": "2025-06-13T00:00:00.000Z",
+      "endDate": "2025-06-16T00:00:00.000Z",
+      "formattedDates": "13 Jun - 16 Jun",
+      "budget": 35000,
+      "currency": "INR",
+      "notes": "Canals, culture and local food"
+    },
+    {
+      "order": 3,
+      "cityName": "Berlin",
+      "cityId": 13,
+      "startDate": "2025-06-16T00:00:00.000Z",
+      "endDate": "2025-06-20T00:00:00.000Z",
+      "formattedDates": "16 Jun - 20 Jun",
+      "budget": 45000,
+      "currency": "INR",
+      "notes": "History, architecture and nightlife"
+    }
+  ]
+}
+```
+- **Response `200 OK`**:
+```json
+{
+  "success": true,
+  "data": {
+    "tripId": 105,
+    "totalBudget": 120000,
+    "currency": "INR",
+    "stopsCount": 3,
+    "stops": [
+      { "id": 1, "order": 1, "cityName": "Paris", "budget": 40000, "notes": "Museums, cafés and city highlights" },
+      { "id": 2, "order": 2, "cityName": "Amsterdam", "budget": 35000, "notes": "Canals, culture and local food" },
+      { "id": 3, "order": 3, "cityName": "Berlin", "budget": 45000, "notes": "History, architecture and nightlife" }
+    ]
+  }
+}
+```
+
+#### `GET /api/activities/search`
+Searches for activities and attractions to add to a trip stop.
+
+- **Query Parameters:**
+  - `city` *(string, optional)*: Filter by city name (e.g. `"Paris"`, `"Amsterdam"`, `"Berlin"`).
+  - `q` *(string, optional)*: Search keyword.
+- **Response `200 OK`**:
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 501,
+      "name": "Louvre Museum Guided Tour",
+      "cityName": "Paris",
+      "category": "Culture",
+      "durationMinutes": 180,
+      "rating": 4.8,
+      "estimatedCost": 3500,
+      "currency": "INR"
+    },
+    {
+      "id": 502,
+      "name": "Amsterdam Canal Cruise & Wine Tasting",
+      "cityName": "Amsterdam",
+      "category": "Sightseeing",
+      "durationMinutes": 90,
+      "rating": 4.9,
+      "estimatedCost": 2800,
+      "currency": "INR"
+    }
+  ]
 }
 ```
 

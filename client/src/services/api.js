@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { mockUser, mockRegions, mockTrips, mockCities } from './mockData.js';
+import { mockUser, mockRegions, mockTrips, mockCities, mockActivities } from './mockData.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -146,6 +146,51 @@ export const apiService = {
         currency: 'USD',
       };
       return newTrip;
+    }
+  },
+
+  /**
+   * Search activities for a specific city or keyword
+   */
+  async searchActivities(cityName = '', query = '') {
+    try {
+      const response = await apiClient.get('/activities/search', {
+        params: { city: cityName, q: query },
+      });
+      return response.data.data;
+    } catch {
+      let filtered = [...mockActivities];
+      if (cityName) {
+        filtered = filtered.filter(
+          (a) => a.cityName.toLowerCase() === cityName.toLowerCase()
+        );
+      }
+      if (query) {
+        const q = query.toLowerCase();
+        filtered = filtered.filter(
+          (a) =>
+            a.name.toLowerCase().includes(q) ||
+            a.category.toLowerCase().includes(q)
+        );
+      }
+      return filtered.length > 0 ? filtered : mockActivities;
+    }
+  },
+
+  /**
+   * Batch save trip stops
+   */
+  async saveTripStops(tripId, stops) {
+    try {
+      const response = await apiClient.put(`/trips/${tripId}/stops`, { stops });
+      return response.data.data;
+    } catch {
+      return {
+        tripId,
+        stops,
+        totalBudget: stops.reduce((acc, s) => acc + (Number(s.budget) || 0), 0),
+        currency: 'INR',
+      };
     }
   },
 };
