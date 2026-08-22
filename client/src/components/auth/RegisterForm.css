@@ -1,0 +1,59 @@
+.register-form-container {
+  width: 100%;
+  text-align: left;
+}
+
+.form-header {
+  margin-bottom: 20px;
+}
+
+.form-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-title);
+  letter-spacing: -0.5px;
+}
+
+.form-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 580px) {
+  .form-grid-2col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 0.9375rem;
+  color: #1e293b;
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  resize: vertical;
+  min-height: 80px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  outline: none;
+}
+
+.form-textarea::placeholder {
+  color: #94a3b8;
+}
+
+.form-textarea:hover:not(:disabled) {
+  border-color: #cbd5e1;
+}
+
+.form-textarea:focus {
+  border-color: #4f6bf5;
+  box-shadow: 0 0 0 3px rgba(79, 107, 245, 0.15);
+}
+
+.form-textarea:disabled {
+  background-color: #f8fafc;
+  cursor: not-allowed;
+}
