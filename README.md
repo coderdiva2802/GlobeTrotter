@@ -150,7 +150,20 @@ npx prisma generate
 
 ---
 
-### 8. Verify Database Connection
+### 8. Seed the Database with Testing Accounts
+To populate your database with pre-configured test user accounts for testing login, registration, and user roles:
+
+```bash
+# Inside server/ directory:
+npm run seed
+
+# Or using Prisma CLI:
+npx prisma db seed
+```
+
+---
+
+### 9. Verify Database Connection
 Run the included database test script:
 
 ```bash
@@ -165,12 +178,24 @@ Connected database: [ { current_database: 'globetrotter_db' } ]
 
 ---
 
-### 9. (Optional) Prisma Studio
+### 10. (Optional) Prisma Studio
 To visually browse, inspect, and edit your database tables and records:
 
 ```bash
 npx prisma studio
 ```
+
+---
+
+## 🔑 Authentication Testing Accounts
+
+The database seed script initializes the following pre-configured test user accounts:
+
+| Role | Email | Password | Name | Default Currency & Style |
+| :--- | :--- | :--- | :--- | :--- |
+| **Demo Traveler** | `traveler@globetrotter.com` | `Traveler123!` | Aliza Saiyed | `INR` / Relaxed |
+| **Admin User** | `admin@globetrotter.com` | `AdminSecret123!` | System Admin | `USD` / Cultural |
+| **Backpacker** | `adventurer@globetrotter.com` | `Explore123!` | Liam Vance | `EUR` / Adventurous |
 
 ---
 
@@ -191,19 +216,21 @@ The database schema is structured into the following core domains:
 
 ## 🚀 Running the Application
 
-### Backend
+### 1. Start Backend Server
 
 ```bash
 cd server
+npm install
+npm run seed    # (Optional) Populates test accounts
 npm run dev
 ```
-The server will start at `http://localhost:5000`.
+The backend server starts at `http://localhost:5000`.
 
-### Frontend
+### 2. Start Frontend Application
 
 ```bash
 cd client
 npm install
 npm run dev
 ```
-The client will start at `http://localhost:5173`.
+The frontend client starts at `http://localhost:5173`.
