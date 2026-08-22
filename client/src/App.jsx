@@ -1,18 +1,26 @@
 import { useState, useEffect, useMemo } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { LayoutGrid, Calendar as CalendarIcon } from 'lucide-react';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { CurrencyProvider } from './context/CurrencyContext.jsx';
 import { ProtectedRoute } from './components/auth/ProtectedRoute.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
+import ActivitySearchPage from './pages/ActivitySearchPage.jsx';
 
-import { Navbar } from './components/layout/Navbar.jsx';
-import { HeroBanner } from './components/home/HeroBanner.jsx';
-import { SearchFilterBar } from './components/home/SearchFilterBar.jsx';
-import { RegionalSelections } from './components/home/RegionalSelections.jsx';
-import { PreviousTrips } from './components/home/PreviousTrips.jsx';
-import { FloatingPlanButton } from './components/common/FloatingPlanButton.jsx';
-import { RegionDetailsModal } from './components/modals/RegionDetailsModal.jsx';
+import Navbar from './components/layout/Navbar.jsx';
+import HeroBanner from './components/home/HeroBanner.jsx';
+import SearchFilterBar from './components/home/SearchFilterBar.jsx';
+import RegionalSelections from './components/home/RegionalSelections.jsx';
+import PreviousTrips from './components/home/PreviousTrips.jsx';
+import HomeActivitiesSection from './components/home/HomeActivitiesSection.jsx';
+import TripsCalendarView from './components/calendar/TripsCalendarView.jsx';
+import FloatingPlanButton from './components/common/FloatingPlanButton.jsx';
+import PlanTripModal from './components/modals/PlanTripModal.jsx';
+import TripDetailsModal from './components/modals/TripDetailsModal.jsx';
+import RegionDetailsModal from './components/modals/RegionDetailsModal.jsx';
+import ActivityDetailsModal from './components/search/ActivityDetailsModal.jsx';
 
 // Itinerary and Wizard Components
 import { CreateTripWizard } from './components/wizard/CreateTripWizard.jsx';
@@ -22,14 +30,15 @@ import { apiService } from './services/api.js';
 import './App.css';
 
 function Dashboard() {
+  const navigate = useNavigate();
   const { user: authUser, logout } = useAuth();
-  // Navigation & View States
-  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'trips' | 'community' | 'create-trip' | 'itinerary-view'
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'trips' | 'calendar' | 'community' | 'create-trip' | 'itinerary-view'
+  const [tripsViewMode, setTripsViewMode] = useState('cards'); // 'cards' | 'calendar'
 
-  // Data States
   const [userData, setUserData] = useState(null);
   const [regions, setRegions] = useState([]);
   const [trips, setTrips] = useState([]);
+  const [activities, setActivities] = useState([]);
 
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,23 +50,33 @@ function Dashboard() {
   const [activeItineraryTrip, setActiveItineraryTrip] = useState(null);
   const [editingTrip, setEditingTrip] = useState(null);
   const [wizardInitialStep, setWizardInitialStep] = useState(1);
+  const [selectedTrip, setSelectedTrip] = useState(null);
   const [selectedRegion, setSelectedRegion] = useState(null);
+  const [selectedActivity, setSelectedActivity] = useState(null);
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
+
+  const showToast = (message) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   // Load initial data
   useEffect(() => {
     async function loadData() {
-      const [fetchedUser, regionsData, tripsData] = await Promise.all([
+      const [fetchedUser, regionsData, tripsData, activitiesData] = await Promise.all([
         apiService.getCurrentUser(),
         apiService.getRegions(),
         apiService.getUserTrips(),
+        apiService.searchActivities({ query: searchQuery }),
       ]);
       setUserData(fetchedUser);
       setRegions(regionsData);
       setTrips(tripsData);
+      setActivities(activitiesData?.activities || []);
     }
     loadData();
-  }, []);
+  }, [searchQuery]);
 
   // Format active user profile display
   const displayUser = useMemo(() => {
@@ -65,86 +84,71 @@ function Dashboard() {
     if (!u) return null;
     const name = u.firstName
       ? `${u.firstName}${u.lastName ? ' ' + u.lastName : ''}`
-      : u.fullName || u.name || 'Traveler';
-
+      : u.name || u.fullName || 'User';
     return {
       ...u,
       name,
-      fullName: name,
-      email: u.email || '',
-      profileImageUrl:
-        u.profileImageUrl ||
-        'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
     };
   }, [authUser, userData]);
 
-  const showToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3500);
-  };
-
-  // Start new trip
-  const handleStartNewTrip = () => {
-    setEditingTrip(null);
+  const handleStartNewTrip = (initialData = null) => {
+    setEditingTrip(initialData);
     setWizardInitialStep(1);
     setActiveTab('create-trip');
   };
 
-  // Handle editing itinerary without losing data
-  const handleEditItinerary = (tripToEdit, startStep = 2) => {
-    setEditingTrip(tripToEdit || activeItineraryTrip);
-    setWizardInitialStep(startStep);
+  const handleEditItinerary = (trip, step = 2) => {
+    setEditingTrip(trip);
+    setWizardInitialStep(step);
     setActiveTab('create-trip');
   };
 
-  // Handle deleting a trip
-  const handleDeleteTrip = async (tripId) => {
-    await apiService.deleteTrip(tripId);
-    setTrips((prev) => prev.filter((t) => t.id !== tripId));
-    if (activeItineraryTrip?.id === tripId) {
-      setActiveItineraryTrip(null);
-    }
-    showToast('Trip deleted successfully');
-  };
-
-  // Handle completed trip creation from wizard -> navigate to Itinerary View
-  const handleWizardComplete = async (tripFormData) => {
-    const createdTrip = await apiService.createTrip(tripFormData);
+  const handleWizardComplete = (savedTrip) => {
     setTrips((prev) => {
-      const existingIdx = prev.findIndex((t) => t.id === createdTrip.id);
-      if (existingIdx >= 0) {
-        const updated = [...prev];
-        updated[existingIdx] = createdTrip;
-        return updated;
+      const idx = prev.findIndex((t) => t.id === savedTrip.id);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = savedTrip;
+        return copy;
       }
-      return [createdTrip, ...prev];
+      return [savedTrip, ...prev];
     });
-    setActiveItineraryTrip(createdTrip);
-    setEditingTrip(null);
+    setActiveItineraryTrip(savedTrip);
     setActiveTab('itinerary-view');
-    showToast(`🎉 "${createdTrip.name}" itinerary updated!`);
+    showToast(`🎉 Journey "${savedTrip.name}" saved successfully!`);
   };
 
-  // Handle saving draft from wizard
-  const handleSaveDraft = async (draftData) => {
-    const draftTrip = await apiService.createTrip({
-      ...draftData,
-      name: draftData.name || 'Untitled Draft Trip',
-    });
-    setTrips((prev) => [draftTrip, ...prev]);
-    setEditingTrip(null);
-    setActiveTab('home');
-    showToast(`💾 Draft saved: "${draftTrip.name}"`);
+  const handleSaveDraft = (draftTrip) => {
+    handleWizardComplete(draftTrip);
   };
 
-  // Filter and sort trips
+  const handleCreateTrip = async (tripData) => {
+    const newTrip = await apiService.createTrip(tripData);
+    setTrips((prev) => [newTrip, ...prev]);
+    showToast(`✈️ Trip "${newTrip.name}" created successfully!`);
+    return newTrip;
+  };
+
+  const handleDeleteTrip = async (tripId) => {
+    const result = await apiService.deleteTrip(tripId);
+    if (result?.success || result) {
+      setTrips((prev) => prev.filter((t) => t.id !== tripId));
+      if (activeItineraryTrip?.id === tripId) {
+        setActiveItineraryTrip(null);
+        setActiveTab('home');
+      }
+      showToast('🗑️ Trip deleted.');
+    }
+  };
+
+  // Filter and sort trips dynamically
   const processedTrips = useMemo(() => {
     let result = [...trips];
 
-    // Filter by status
+    // Filter by status tab
     if (activeFilter !== 'all') {
       result = result.filter(
-        (t) => t.status.toLowerCase() === activeFilter.toLowerCase()
+        (t) => t.status?.toLowerCase() === activeFilter.toLowerCase()
       );
     }
 
@@ -153,13 +157,13 @@ function Dashboard() {
       const q = searchQuery.toLowerCase();
       result = result.filter(
         (t) =>
-          t.name.toLowerCase().includes(q) ||
-          t.locationSummary.toLowerCase().includes(q) ||
-          (t.description && t.description.toLowerCase().includes(q))
+          t.name?.toLowerCase().includes(q) ||
+          t.locationSummary?.toLowerCase().includes(q) ||
+          t.description?.toLowerCase().includes(q)
       );
     }
 
-    // Sort
+    // Apply sorting
     if (activeSort === 'title') {
       result.sort((a, b) => a.name.localeCompare(b.name));
     } else if (activeSort === 'date') {
@@ -195,28 +199,25 @@ function Dashboard() {
         </div>
       )}
 
-      {/* 1. Header / Navbar with Currency Switcher */}
+      {/* Header / Navbar */}
       <Navbar
         user={displayUser}
         activeTab={activeTab}
         onTabChange={(tab) => {
-          if (tab === 'create-trip') {
+          if (tab === 'profile') {
+            navigate('/profile');
+          } else if (tab === 'search' || tab === 'activities') {
+            navigate('/search');
+          } else if (tab === 'create-trip') {
             handleStartNewTrip();
           } else {
             setActiveTab(tab);
+            if (tab === 'trips') {
+              setActiveFilter('all');
+            }
           }
         }}
-        onSearchClick={() => {
-          const searchInput = document.querySelector('.search-input');
-          if (searchInput) searchInput.focus();
-        }}
-        onProfileClick={() => {
-          showToast(`Logged in as ${displayUser?.name || 'Traveler'}`);
-        }}
-        onLogoutClick={() => {
-          logout();
-          showToast('You have been logged out.');
-        }}
+        onSearchOpen={() => navigate('/search')}
       />
 
       {/* Main Page Content */}
@@ -244,10 +245,10 @@ function Dashboard() {
 
         {activeTab === 'home' && (
           <>
-            {/* 2. Canyon Hero Banner */}
+            {/* Hero Banner */}
             <HeroBanner onExploreClick={handleStartNewTrip} />
 
-            {/* 3. Search & Filter Bar */}
+            {/* Search & Filter Bar */}
             <SearchFilterBar
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -257,9 +258,10 @@ function Dashboard() {
               onSortChange={setActiveSort}
               activeGroupBy={activeGroupBy}
               onGroupByChange={setActiveGroupBy}
+              onSelectActivity={(act) => setSelectedActivity(act)}
             />
 
-            {/* 4. Top Regional Selections */}
+            {/* Top Regional Selections */}
             <RegionalSelections
               regions={processedRegions}
               onSelectRegion={(region) => setSelectedRegion(region)}
@@ -268,7 +270,15 @@ function Dashboard() {
               }}
             />
 
-            {/* 5. Previous Trips Section */}
+            {/* Activities & Treks Section */}
+            <HomeActivitiesSection
+              activities={activities}
+              searchQuery={searchQuery}
+              onViewAll={() => navigate(searchQuery ? `/search?q=${encodeURIComponent(searchQuery)}` : '/search')}
+              onViewActivity={(act) => setSelectedActivity(act)}
+            />
+
+            {/* Previous Trips Section */}
             <PreviousTrips
               trips={processedTrips}
               activeGroupBy={activeGroupBy}
@@ -283,6 +293,31 @@ function Dashboard() {
           </>
         )}
 
+        {activeTab === 'calendar' && (
+          <TripsCalendarView
+            onSelectTrip={(calTrip) => {
+              const matchingTrip = trips.find((t) => t.id === calTrip.tripId || t.name === calTrip.name) || {
+                id: calTrip.id,
+                name: calTrip.name || calTrip.title,
+                description: calTrip.description || 'Custom planned itinerary on calendar.',
+                startDate: calTrip.startDate,
+                endDate: calTrip.endDate,
+                formattedDates: `${calTrip.startDate} - ${calTrip.endDate}`,
+                travelerCount: calTrip.travelerCount || 2,
+                travelerLabel: `${calTrip.travelerCount || 2} Travelers`,
+                status: (calTrip.category || 'UPCOMING').toUpperCase(),
+                statusLabel: calTrip.categoryLabel || 'Upcoming',
+                coverImageUrl: calTrip.coverImageUrl,
+                locationSummary: calTrip.locationSummary,
+                stops: calTrip.stops || [{ id: 1, cityName: calTrip.locationSummary || 'Destination', countryName: '', order: 1 }],
+                budget: calTrip.budget || 25000,
+                currency: calTrip.currency || 'INR',
+              };
+              setSelectedTrip(matchingTrip);
+            }}
+          />
+        )}
+
         {activeTab === 'trips' && (
           <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div className="section-header" style={{ marginBottom: 0 }}>
@@ -292,15 +327,29 @@ function Dashboard() {
                   All your planned, ongoing, and completed adventures in one place.
                 </p>
               </div>
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={handleStartNewTrip}
-              >
-                + New Trip
-              </button>
+
+              {/* View Switcher Toggle */}
+              <div className="trips-view-mode-toggle">
+                <button
+                  type="button"
+                  className={`trips-toggle-btn ${tripsViewMode === 'cards' ? 'active' : ''}`}
+                  onClick={() => setTripsViewMode('cards')}
+                >
+                  <LayoutGrid size={15} />
+                  <span>Cards View</span>
+                </button>
+                <button
+                  type="button"
+                  className={`trips-toggle-btn ${tripsViewMode === 'calendar' ? 'active' : ''}`}
+                  onClick={() => setTripsViewMode('calendar')}
+                >
+                  <CalendarIcon size={15} />
+                  <span>Calendar View</span>
+                </button>
+              </div>
             </div>
 
+            {/* Search & Filter Controls */}
             <SearchFilterBar
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -310,65 +359,90 @@ function Dashboard() {
               onSortChange={setActiveSort}
               activeGroupBy={activeGroupBy}
               onGroupByChange={setActiveGroupBy}
+              onSelectActivity={(act) => setSelectedActivity(act)}
             />
 
-            <PreviousTrips
-              trips={processedTrips}
-              activeGroupBy={activeGroupBy}
-              sectionTitle={`All Trips (${processedTrips.length})`}
-              hideHeader={false}
-              onViewDetails={(trip) => {
-                setActiveItineraryTrip(trip);
-                setActiveTab('itinerary-view');
-              }}
-              onDeleteTrip={handleDeleteTrip}
-              onViewAll={() => {}}
-              onPlanTrip={handleStartNewTrip}
-            />
+            {tripsViewMode === 'calendar' ? (
+              <TripsCalendarView
+                onSelectTrip={(calTrip) => {
+                  const matchingTrip = trips.find((t) => t.id === calTrip.tripId || t.name === calTrip.name) || {
+                    id: calTrip.id,
+                    name: calTrip.name || calTrip.title,
+                    description: calTrip.description || 'Custom planned itinerary on calendar.',
+                    startDate: calTrip.startDate,
+                    endDate: calTrip.endDate,
+                    formattedDates: `${calTrip.startDate} - ${calTrip.endDate}`,
+                    travelerCount: calTrip.travelerCount || 2,
+                    travelerLabel: `${calTrip.travelerCount || 2} Travelers`,
+                    status: (calTrip.category || 'UPCOMING').toUpperCase(),
+                    statusLabel: calTrip.categoryLabel || 'Upcoming',
+                    coverImageUrl: calTrip.coverImageUrl,
+                    locationSummary: calTrip.locationSummary,
+                    stops: calTrip.stops || [{ id: 1, cityName: calTrip.locationSummary || 'Destination', countryName: '', order: 1 }],
+                    budget: calTrip.budget || 25000,
+                    currency: calTrip.currency || 'INR',
+                  };
+                  setSelectedTrip(matchingTrip);
+                }}
+              />
+            ) : (
+              <PreviousTrips
+                trips={processedTrips}
+                activeGroupBy={activeGroupBy}
+                sectionTitle={`All Trips (${processedTrips.length})`}
+                hideHeader={false}
+                onViewDetails={(trip) => {
+                  setActiveItineraryTrip(trip);
+                  setActiveTab('itinerary-view');
+                }}
+                onDeleteTrip={handleDeleteTrip}
+                onViewAll={() => {}}
+                onPlanTrip={handleStartNewTrip}
+              />
+            )}
           </div>
         )}
 
         {activeTab === 'community' && (
-          <div className="animate-fade-in" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
-            <h2 className="section-title" style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>
-              Travelers Community
-            </h2>
-            <p style={{ color: 'var(--text-muted)', maxWidth: '500px', margin: '0 auto 1.5rem auto' }}>
-              Discover public trip plans, curated guides, and real travel recommendations shared by globetrotters worldwide.
+          <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
+            <h2>GlobeTrotter Community Hub</h2>
+            <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+              Connect with fellow travelers, share trip itineraries, and ask questions.
             </p>
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={() => showToast('Community trip sharing is enabled for all public itineraries!')}
-              >
-                Explore Public Itineraries
-              </button>
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={logout}
-              >
-                Logout
-              </button>
-            </div>
           </div>
         )}
       </main>
 
-      {/* 6. Floating Action Button: + Plan a trip */}
+      {/* Floating Action Button */}
       {activeTab !== 'create-trip' && activeTab !== 'itinerary-view' && (
         <FloatingPlanButton onClick={handleStartNewTrip} />
       )}
 
-      {/* 7. Region Details Modal */}
+      {/* Modals */}
+      <PlanTripModal
+        isOpen={isPlanModalOpen}
+        onClose={() => setIsPlanModalOpen(false)}
+        onSubmitTrip={handleCreateTrip}
+      />
+
+      <TripDetailsModal
+        trip={selectedTrip}
+        isOpen={Boolean(selectedTrip)}
+        onClose={() => setSelectedTrip(null)}
+      />
+
       <RegionDetailsModal
         region={selectedRegion}
         isOpen={Boolean(selectedRegion)}
         onClose={() => setSelectedRegion(null)}
-        onPlanForRegion={() => {
-          handleStartNewTrip();
-        }}
+        onPlanForRegion={() => handleStartNewTrip()}
+      />
+
+      <ActivityDetailsModal
+        activity={selectedActivity}
+        isOpen={Boolean(selectedActivity)}
+        onClose={() => setSelectedActivity(null)}
+        onAddToTrip={(act) => showToast(`✅ "${act.name}" added to your itinerary!`)}
       />
     </div>
   );
@@ -390,6 +464,23 @@ export default function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <ProtectedRoute>
+                  <ActivitySearchPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/activities" element={<Navigate to="/search" replace />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

@@ -8,6 +8,9 @@ import {
   mockHolidayPackages,
   mockDayWiseItinerary,
   getDestinationCoverImage,
+  mockPreplannedTrips,
+  mockPreviousTrips,
+  mockCalendarTrips,
 } from './mockData.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
@@ -53,6 +56,65 @@ export const apiService = {
       return response.data?.data?.user || response.data?.data || mockUser;
     } catch {
       return mockUser;
+    }
+  },
+
+  /**
+   * Get user profile along with travel statistics and categorized trips
+   */
+  async getUserProfileWithStats() {
+    try {
+      const response = await api.get('/users/profile');
+      return response.data?.data || {
+        user: mockUser,
+        preplannedTrips: mockPreplannedTrips,
+        previousTrips: mockPreviousTrips,
+      };
+    } catch {
+      return {
+        user: mockUser,
+        preplannedTrips: mockPreplannedTrips,
+        previousTrips: mockPreviousTrips,
+      };
+    }
+  },
+
+  /**
+   * Update user profile information
+   */
+  async updateUserProfile(profileData) {
+    try {
+      const response = await api.put('/users/profile', profileData);
+      return response.data?.data?.user || response.data?.data;
+    } catch {
+      return {
+        ...mockUser,
+        ...profileData,
+        name: `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim() || mockUser.name,
+      };
+    }
+  },
+
+  /**
+   * Get calendar trips mapping for a given month
+   */
+  async getCalendarTrips(monthYear = '2024-01', category = 'all') {
+    try {
+      const response = await api.get('/trips/calendar', {
+        params: { month: monthYear, category },
+      });
+      return response.data?.data;
+    } catch {
+      let events = [...mockCalendarTrips];
+      if (category && category !== 'all') {
+        events = events.filter((e) => e.category === category);
+      }
+      return {
+        month: monthYear,
+        monthLabel: 'January 2024',
+        totalEvents: events.length,
+        events,
+      };
     }
   },
 
@@ -103,6 +165,30 @@ export const apiService = {
           c.region.toLowerCase().includes(q)
       );
       return filtered.length > 0 ? filtered : mockCities;
+    }
+  },
+
+  /**
+   * Get upcoming / preplanned trips
+   */
+  async getPreplannedTrips() {
+    try {
+      const response = await api.get('/trips/user', { params: { status: 'upcoming' } });
+      return response.data?.data || mockPreplannedTrips;
+    } catch {
+      return mockPreplannedTrips;
+    }
+  },
+
+  /**
+   * Get past / completed trips
+   */
+  async getPreviousTrips() {
+    try {
+      const response = await api.get('/trips/user', { params: { status: 'completed' } });
+      return response.data?.data || mockPreviousTrips;
+    } catch {
+      return mockPreviousTrips;
     }
   },
 
@@ -239,10 +325,9 @@ export const apiService = {
 
       let matched = [...mockActivities];
 
-      // 1. Filter by destination
       if (destStr) {
         matched = matched.filter((act) => {
-          const actCity = act.cityName.toLowerCase();
+          const actCity = (act.cityName || '').toLowerCase();
           const actCountry = (act.countryName || '').toLowerCase();
 
           return (
@@ -270,13 +355,12 @@ export const apiService = {
         }
       }
 
-      // 2. Filter by search query
       if (queryStr) {
         matched = matched.filter(
           (act) =>
             act.name.toLowerCase().includes(queryStr) ||
-            act.category.toLowerCase().includes(queryStr) ||
-            act.cityName.toLowerCase().includes(queryStr)
+            (act.category && act.category.toLowerCase().includes(queryStr)) ||
+            (act.cityName && act.cityName.toLowerCase().includes(queryStr))
         );
       }
 
@@ -286,7 +370,6 @@ export const apiService = {
 
   /**
    * Get full day-wise itinerary and dynamic budget calculations factoring in traveler count
-   * PRESERVES ALL STOPS, ACTIVITIES AND FORM FIELDS ON THE RETURNED TRIP
    */
   async getTripItinerary(tripId, tripOverride = null) {
     try {

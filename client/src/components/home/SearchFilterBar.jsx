@@ -1,5 +1,18 @@
-import { useState, useRef, useEffect } from 'react';
-import { Search, Layers, SlidersHorizontal, ArrowUpDown, X, Check } from 'lucide-react';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Search,
+  Layers,
+  SlidersHorizontal,
+  ArrowUpDown,
+  X,
+  Check,
+  Compass,
+  MapPin,
+  Calendar,
+  ArrowRight,
+} from 'lucide-react';
+import { mockActivities, mockRegions, mockTrips } from '../../services/mockData';
 
 export const SearchFilterBar = ({
   searchQuery,
@@ -10,8 +23,11 @@ export const SearchFilterBar = ({
   onSortChange,
   activeGroupBy,
   onGroupByChange,
+  onSelectActivity,
 }) => {
+  const navigate = useNavigate();
   const [openDropdown, setOpenDropdown] = useState(null); // 'group' | 'filter' | 'sort' | null
+  const [isInputFocused, setIsInputFocused] = useState(false);
   const containerRef = useRef(null);
 
   // Close dropdowns on click outside
@@ -19,6 +35,7 @@ export const SearchFilterBar = ({
     const handleClickOutside = (event) => {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
         setOpenDropdown(null);
+        setIsInputFocused(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -27,6 +44,60 @@ export const SearchFilterBar = ({
 
   const toggleDropdown = (name) => {
     setOpenDropdown((prev) => (prev === name ? null : name));
+    setIsInputFocused(false);
+  };
+
+  // Compute live suggestions matching searchQuery
+  const suggestions = useMemo(() => {
+    if (!searchQuery || !searchQuery.trim()) return null;
+    const q = searchQuery.toLowerCase().trim();
+
+    const matchingActivities = mockActivities.filter(
+      (a) =>
+        a.name.toLowerCase().includes(q) ||
+        a.destination.toLowerCase().includes(q) ||
+        a.description.toLowerCase().includes(q)
+    ).slice(0, 3);
+
+    const matchingRegions = mockRegions.filter(
+      (r) =>
+        r.name.toLowerCase().includes(q) ||
+        r.description.toLowerCase().includes(q)
+    ).slice(0, 2);
+
+    const matchingTrips = mockTrips.filter(
+      (t) =>
+        t.name.toLowerCase().includes(q) ||
+        t.locationSummary.toLowerCase().includes(q)
+    ).slice(0, 2);
+
+    const totalCount =
+      matchingActivities.length + matchingRegions.length + matchingTrips.length;
+
+    return {
+      activities: matchingActivities,
+      regions: matchingRegions,
+      trips: matchingTrips,
+      totalCount,
+    };
+  }, [searchQuery]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      if (searchQuery.trim()) {
+        navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+        setIsInputFocused(false);
+      }
+    }
+  };
+
+  const handleActivityClick = (act) => {
+    setIsInputFocused(false);
+    if (onSelectActivity) {
+      onSelectActivity(act);
+    } else {
+      navigate(`/search?q=${encodeURIComponent(act.name)}`);
+    }
   };
 
   return (
@@ -38,9 +109,11 @@ export const SearchFilterBar = ({
           <input
             type="text"
             className="search-input"
-            placeholder="Search destinations, trips, experiences..."
+            placeholder="Search destinations, trips, activities (e.g. Manali, Trek)..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
+            onFocus={() => setIsInputFocused(true)}
+            onKeyDown={handleKeyDown}
           />
           {searchQuery && (
             <button
@@ -266,6 +339,100 @@ export const SearchFilterBar = ({
           </div>
         </div>
       </div>
+
+      {/* Live Suggestions Dropdown (Option 2) */}
+      {isInputFocused && suggestions && (
+        <div className="live-search-suggestions-panel animate-fade-in">
+          {/* 1. Activities Matches */}
+          {suggestions.activities.length > 0 && (
+            <div className="suggestions-category-block">
+              <div className="suggestions-category-title">
+                <Compass size={14} />
+                <span>Activities & Treks</span>
+              </div>
+              {suggestions.activities.map((act) => (
+                <div
+                  key={act.id}
+                  className="suggestion-item-row"
+                  onMouseDown={() => handleActivityClick(act)}
+                >
+                  <img
+                    src={act.coverImageUrl}
+                    alt={act.name}
+                    className="suggestion-thumb"
+                  />
+                  <div className="suggestion-item-info">
+                    <div className="suggestion-item-name">{act.name}</div>
+                    <div className="suggestion-item-sub">
+                      📍 {act.destination} • {act.durationLabel || `${act.durationDays} Days`}
+                    </div>
+                  </div>
+                  <div className="suggestion-item-price">
+                    {act.formattedPrice || `₹${act.price.toLocaleString('en-IN')}`}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 2. Regions / Destinations */}
+          {suggestions.regions.length > 0 && (
+            <div className="suggestions-category-block">
+              <div className="suggestions-category-title">
+                <MapPin size={14} />
+                <span>Continents & Regions</span>
+              </div>
+              {suggestions.regions.map((reg) => (
+                <div
+                  key={reg.id}
+                  className="suggestion-item-row"
+                  onMouseDown={() => {
+                    setIsInputFocused(false);
+                    navigate(`/search?q=${encodeURIComponent(reg.name)}`);
+                  }}
+                >
+                  <div className="suggestion-item-name">🌍 {reg.name}</div>
+                  <div className="suggestion-item-sub">{reg.destinationCountLabel}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 3. Personal Trips */}
+          {suggestions.trips.length > 0 && (
+            <div className="suggestions-category-block">
+              <div className="suggestions-category-title">
+                <Calendar size={14} />
+                <span>My Saved Trips</span>
+              </div>
+              {suggestions.trips.map((trip) => (
+                <div
+                  key={trip.id}
+                  className="suggestion-item-row"
+                  onMouseDown={() => {
+                    setIsInputFocused(false);
+                  }}
+                >
+                  <div className="suggestion-item-name">🧳 {trip.name}</div>
+                  <div className="suggestion-item-sub">{trip.locationSummary} • {trip.statusLabel}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Bottom Prompt: Press Enter or Click */}
+          <div
+            className="suggestions-footer-cta"
+            onMouseDown={() => {
+              navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+              setIsInputFocused(false);
+            }}
+          >
+            <span>Press <strong>Enter</strong> to search all activities for &ldquo;{searchQuery}&rdquo;</span>
+            <ArrowRight size={14} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

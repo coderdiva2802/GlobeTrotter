@@ -1,4 +1,8 @@
+import { useNavigate } from 'react-router-dom';
+
 export const HeroBanner = ({ onExploreClick }) => {
+  const navigate = useNavigate();
+
   return (
     <section className="hero-banner-section">
       <div className="hero-banner-container">
@@ -17,14 +21,24 @@ export const HeroBanner = ({ onExploreClick }) => {
             and make your dream trips a reality.
           </p>
 
-          <button
-            type="button"
-            className="hero-cta-btn"
-            onClick={onExploreClick}
-          >
-            <span className="cta-dot">●</span>
-            <span>Explore Now</span>
-          </button>
+          <div className="hero-buttons-row">
+            <button
+              type="button"
+              className="hero-cta-btn"
+              onClick={onExploreClick}
+            >
+              <span className="cta-dot">●</span>
+              <span>Explore Now</span>
+            </button>
+
+            <button
+              type="button"
+              className="hero-search-activities-btn"
+              onClick={() => navigate('/search')}
+            >
+              <span>Search Activities ➔</span>
+            </button>
+          </div>
         </div>
       </div>
     </section>

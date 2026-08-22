@@ -1,0 +1,60 @@
+.home-activities-section {
+  width: 100%;
+  margin-top: 24px;
+}
+
+.home-activities-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.section-title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-compass-icon {
+  color: #2563eb;
+}
+
+.home-activities-subtitle {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+}
+
+.home-view-all-activities-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #2563eb;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.home-view-all-activities-btn:hover {
+  color: #1d4ed8;
+  transform: translateX(2px);
+}
+
+.home-activities-cards-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+}
+
+.home-no-activities-box {
+  padding: 36px;
+  text-align: center;
+  background-color: var(--bg-card);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-lg);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
