@@ -1,0 +1,2 @@
+# GlobeTrotter
+odoo hackathon
