@@ -229,13 +229,6 @@ function Dashboard() {
                   All your planned, ongoing, and completed adventures in one place.
                 </p>
               </div>
-              <button
-                type="button"
-                className="btn-primary"
-                onClick={() => setIsPlanModalOpen(true)}
-              >
-                + New Trip
-              </button>
             </div>
 
             <SearchFilterBar

@@ -3,6 +3,11 @@ import { X, MapPin, ArrowRight } from 'lucide-react';
 export const RegionDetailsModal = ({ region, isOpen, onClose, onPlanForRegion }) => {
   if (!isOpen || !region) return null;
 
+  const popularCitiesList =
+    region.popularCities && region.popularCities.length > 0
+      ? region.popularCities
+      : ['Tokyo', 'Kyoto', 'Malé', 'Mumbai', 'Jaipur'];
+
   return (
     <div className="modal-backdrop animate-fade-in" onClick={onClose}>
       <div
@@ -41,7 +46,7 @@ export const RegionDetailsModal = ({ region, isOpen, onClose, onPlanForRegion })
           <div className="details-section">
             <h4 className="details-section-title">Popular Destinations</h4>
             <div className="region-chips-grid">
-              {(region.popularCities || ['Paris', 'Rome', 'Barcelona', 'Amsterdam', 'Vienna']).map((city, idx) => (
+              {popularCitiesList.map((city, idx) => (
                 <div key={idx} className="region-city-chip">
                   <MapPin size={14} className="chip-icon" />
                   <span>{city}</span>

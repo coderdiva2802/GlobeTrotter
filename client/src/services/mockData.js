@@ -25,7 +25,8 @@ export const mockRegions = [
     destinationCount: 50,
     destinationCountLabel: "50+ Destinations",
     coverImageUrl: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80",
-    description: "Iconic historic landmarks, diverse cultures, and world-class gastronomy."
+    description: "Iconic historic landmarks, diverse cultures, and world-class gastronomy.",
+    popularCities: ["Paris", "Rome", "Santorini", "Athens", "Venice"]
   },
   {
     id: "asia",
@@ -33,7 +34,8 @@ export const mockRegions = [
     destinationCount: 60,
     destinationCountLabel: "60+ Destinations",
     coverImageUrl: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80",
-    description: "Ancient heritage temples, vibrant night markets, and futuristic skylines."
+    description: "Ancient heritage temples, vibrant night markets, and futuristic skylines.",
+    popularCities: ["Tokyo", "Kyoto", "Malé", "Mumbai", "Jaipur"]
   },
   {
     id: "north-america",
@@ -41,7 +43,8 @@ export const mockRegions = [
     destinationCount: 40,
     destinationCountLabel: "40+ Destinations",
     coverImageUrl: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
-    description: "Majestic national parks, coastal highways, and buzzing cosmopolitan hubs."
+    description: "Majestic national parks, coastal highways, and buzzing cosmopolitan hubs.",
+    popularCities: ["New York City", "San Francisco", "Vancouver", "Mexico City", "Los Angeles"]
   },
   {
     id: "south-america",
@@ -49,7 +52,8 @@ export const mockRegions = [
     destinationCount: 30,
     destinationCountLabel: "30+ Destinations",
     coverImageUrl: "https://images.unsplash.com/photo-1589802829985-817e51171b92?auto=format&fit=crop&w=800&q=80",
-    description: "Amazon rainforest wonders, Andean mountain passes, and lively carnival spirit."
+    description: "Amazon rainforest wonders, Andean mountain passes, and lively carnival spirit.",
+    popularCities: ["Cusco", "Rio de Janeiro", "Buenos Aires", "Lima", "Santiago"]
   },
   {
     id: "africa",
@@ -57,7 +61,8 @@ export const mockRegions = [
     destinationCount: 25,
     destinationCountLabel: "25+ Destinations",
     coverImageUrl: "https://images.unsplash.com/photo-1516426122078-c23e76319801?auto=format&fit=crop&w=800&q=80",
-    description: "Breathtaking savannah safaris, Sahara dunes, and rich cultural tapestries."
+    description: "Breathtaking savannah safaris, Sahara dunes, and rich cultural tapestries.",
+    popularCities: ["Cairo", "Cape Town", "Marrakech", "Nairobi", "Zanzibar"]
   }
 ];
 
