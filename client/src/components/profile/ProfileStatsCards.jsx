@@ -1,4 +1,4 @@
-import { Briefcase, MapPin, Camera, Star } from 'lucide-react';
+import { Briefcase, MapPin, Calendar, Globe } from 'lucide-react';
 import './ProfileStatsCards.css';
 
 export default function ProfileStatsCards({ stats }) {
@@ -6,29 +6,29 @@ export default function ProfileStatsCards({ stats }) {
     {
       id: 'trips',
       label: 'Trips Planned',
-      value: stats?.tripsPlanned ?? 12,
+      value: stats?.tripsPlanned ?? 0,
       icon: Briefcase,
       cardClass: 'stat-card-blue',
     },
     {
       id: 'places',
       label: 'Places Explored',
-      value: stats?.placesExplored ?? 18,
+      value: stats?.placesExplored ?? 0,
       icon: MapPin,
       cardClass: 'stat-card-green',
     },
     {
-      id: 'photos',
-      label: 'Photos Captured',
-      value: stats?.photosCaptured ?? 234,
-      icon: Camera,
+      id: 'upcoming',
+      label: 'Upcoming Journeys',
+      value: stats?.upcomingTrips ?? 0,
+      icon: Calendar,
       cardClass: 'stat-card-purple',
     },
     {
       id: 'countries',
       label: 'Countries Visited',
-      value: stats?.countriesVisited ?? 6,
-      icon: Star,
+      value: stats?.countriesVisited ?? 0,
+      icon: Globe,
       cardClass: 'stat-card-yellow',
     },
   ];

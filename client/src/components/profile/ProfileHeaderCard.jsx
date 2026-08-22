@@ -1,19 +1,29 @@
 import { Edit3 } from 'lucide-react';
-import ProfileStatsCards from './ProfileStatsCards';
+import ProfileStatsCards from './ProfileStatsCards.jsx';
 import './ProfileHeaderCard.css';
 
 export default function ProfileHeaderCard({ user, onEditProfile }) {
-  const firstName = user?.firstName || user?.name?.split(' ')[0] || 'Traveler';
-  const fullName = user?.fullName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.name || 'Aarohi Sharma';
-  const email = user?.email || 'aarohi.sharma@example.com';
+  const firstName =
+    user?.firstName ||
+    user?.name?.split(' ')[0] ||
+    user?.fullName?.split(' ')[0] ||
+    'Traveler';
+
+  const fullName =
+    user?.fullName ||
+    (user?.firstName ? `${user.firstName}${user.lastName ? ' ' + user.lastName : ''}` : user?.name) ||
+    'User Profile';
+
+  const email = user?.email || '';
   const profileImageUrl = user?.profileImageUrl;
 
-  const initials = fullName
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .substring(0, 2)
-    .toUpperCase() || 'AS';
+  const initials =
+    fullName
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase() || 'GT';
 
   return (
     <div className="profile-header-card">
