@@ -257,24 +257,53 @@ Unified search endpoint for destinations, trips, and experiences with filtering,
 
 ---
 
-### 2.5 Trip Creation (Plan a Trip)
+### 2.5 Trip Creation (Plan a Trip Wizard)
 
-#### `POST /api/trips`
-Creates a new travel plan.
+#### `GET /api/destinations/autocomplete`
+Searches for cities and destinations for the "Destination / first stop" dropdown in the trip wizard.
 
-- **Headers:** `Authorization: Bearer <token>`, `Content-Type: application/json`
-- **Request Body**:
+- **Query Parameters:**
+  - `q` *(string, required)*: Partial city or country name (e.g. `"Par"` for Paris, `"Tok"` for Tokyo).
+- **Response `200 OK`**:
 ```json
 {
-  "name": "European Summer Odyssey",
-  "description": "10-day tour across France and Italy",
-  "startDate": "2025-06-15T00:00:00.000Z",
-  "endDate": "2025-06-25T00:00:00.000Z",
-  "travelerCount": 2,
-  "budget": 3500.00,
-  "currency": "USD",
-  "visibility": "PRIVATE",
-  "cityIds": [12, 18]
+  "success": true,
+  "data": [
+    {
+      "cityId": 12,
+      "cityName": "Paris",
+      "countryName": "France",
+      "displayName": "Paris, France",
+      "region": "Île-de-France",
+      "coverImageUrl": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "cityId": 14,
+      "cityName": "Rome",
+      "countryName": "Italy",
+      "displayName": "Rome, Italy",
+      "region": "Lazio",
+      "coverImageUrl": "https://images.unsplash.com/photo-1552832230-c0197dd311b5?auto=format&fit=crop&w=800&q=80"
+    }
+  ]
+}
+```
+
+#### `POST /api/trips`
+Creates a trip from Step 1 of the Trip Creation Wizard.
+
+- **Headers:** `Authorization: Bearer <token>`, `Content-Type: application/json`
+- **Request Body (Step 1 Payload)**:
+```json
+{
+  "name": "Europe Summer Adventure",
+  "firstDestination": "Paris, France",
+  "firstCityId": 12,
+  "startDate": "2025-06-10T00:00:00.000Z",
+  "endDate": "2025-06-20T00:00:00.000Z",
+  "description": "Family sightseeing trip visiting museums, historical landmarks, and French culinary tours.",
+  "isDraft": false,
+  "visibility": "PRIVATE"
 }
 ```
 - **Response `201 Created`**:
@@ -282,13 +311,151 @@ Creates a new travel plan.
 {
   "success": true,
   "data": {
-    "id": 104,
-    "name": "European Summer Odyssey",
-    "startDate": "2025-06-15T00:00:00.000Z",
-    "endDate": "2025-06-25T00:00:00.000Z",
+    "id": 105,
+    "name": "Europe Summer Adventure",
+    "startDate": "2025-06-10T00:00:00.000Z",
+    "endDate": "2025-06-20T00:00:00.000Z",
+    "formattedDates": "Jun 10 - Jun 20, 2025",
     "travelerCount": 2,
     "status": "UPCOMING",
     "createdAt": "2025-01-20T10:00:00.000Z"
+  }
+}
+```
+
+#### `PUT /api/trips/:id/stops`
+Saves or updates multi-stop itineraries from Step 2 of the Trip Wizard ("Build your itinerary").
+
+- **Headers:** `Authorization: Bearer <token>`, `Content-Type: application/json`
+- **Request Body (Step 2 Multi-Stop Payload)**:
+```json
+{
+  "stops": [
+    {
+      "order": 1,
+      "cityName": "Paris",
+      "cityId": 1,
+      "startDate": "2025-06-10T00:00:00.000Z",
+      "endDate": "2025-06-13T00:00:00.000Z",
+      "formattedDates": "10 Jun - 13 Jun",
+      "budget": 40000,
+      "currency": "INR",
+      "notes": "Museums, cafés and city highlights"
+    },
+    {
+      "order": 2,
+      "cityName": "Amsterdam",
+      "cityId": 12,
+      "startDate": "2025-06-13T00:00:00.000Z",
+      "endDate": "2025-06-16T00:00:00.000Z",
+      "formattedDates": "13 Jun - 16 Jun",
+      "budget": 35000,
+      "currency": "INR",
+      "notes": "Canals, culture and local food"
+    },
+    {
+      "order": 3,
+      "cityName": "Berlin",
+      "cityId": 13,
+      "startDate": "2025-06-16T00:00:00.000Z",
+      "endDate": "2025-06-20T00:00:00.000Z",
+      "formattedDates": "16 Jun - 20 Jun",
+      "budget": 45000,
+      "currency": "INR",
+      "notes": "History, architecture and nightlife"
+    }
+  ]
+}
+```
+- **Response `200 OK`**:
+```json
+{
+  "success": true,
+  "data": {
+    "tripId": 105,
+    "totalBudget": 120000,
+    "currency": "INR",
+    "stopsCount": 3,
+    "stops": [
+      { "id": 1, "order": 1, "cityName": "Paris", "budget": 40000, "notes": "Museums, cafés and city highlights" },
+      { "id": 2, "order": 2, "cityName": "Amsterdam", "budget": 35000, "notes": "Canals, culture and local food" },
+      { "id": 3, "order": 3, "cityName": "Berlin", "budget": 45000, "notes": "History, architecture and nightlife" }
+    ]
+  }
+}
+```
+
+#### `GET /api/trips/:id/itinerary`
+Fetches the complete day-wise itinerary, time-slotted activities, and budget summary for a trip.
+
+- **Headers:** `Authorization: Bearer <token>`
+- **Response `200 OK`**:
+```json
+{
+  "success": true,
+  "data": {
+    "trip": {
+      "id": 105,
+      "name": "abc",
+      "status": "UPCOMING",
+      "locationSummary": "xyz",
+      "startDate": "2026-08-31T00:00:00.000Z",
+      "endDate": "2026-09-05T00:00:00.000Z",
+      "formattedDates": "2026-08-31 - 2026-09-05",
+      "coverImageUrl": "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1600&q=80"
+    },
+    "budgetSummary": {
+      "totalBudget": 120000,
+      "totalBudgetFormatted": "₹1,20,000",
+      "plannedExpenses": 96500,
+      "plannedExpensesFormatted": "₹96,500",
+      "remainingBudget": 23500,
+      "remainingBudgetFormatted": "₹23,500",
+      "currency": "INR"
+    },
+    "days": [
+      {
+        "dayNumber": 1,
+        "dayLabel": "Day 1",
+        "dateFormatted": "June 10",
+        "cityName": "Paris",
+        "locationHeader": "Paris • June 10",
+        "items": [
+          { "id": 1, "time": "09:00 AM", "activityName": "Eiffel Tower", "expense": 2500, "expenseFormatted": "₹2,500" },
+          { "id": 2, "time": "01:00 PM", "activityName": "Lunch at Le Marais", "expense": 1800, "expenseFormatted": "₹1,800" },
+          { "id": 3, "time": "05:30 PM", "activityName": "Seine River Cruise", "expense": 3000, "expenseFormatted": "₹3,000" }
+        ]
+      },
+      {
+        "dayNumber": 2,
+        "dayLabel": "Day 2",
+        "dateFormatted": "June 11",
+        "cityName": "Paris",
+        "locationHeader": "Paris • June 11",
+        "items": [
+          { "id": 4, "time": "10:00 AM", "activityName": "Louvre Museum", "expense": 2000, "expenseFormatted": "₹2,000" },
+          { "id": 5, "time": "03:00 PM", "activityName": "Montmartre Walk", "expense": 0, "expenseFormatted": "Free" },
+          { "id": 6, "time": "08:00 PM", "activityName": "Dinner Experience", "expense": 2500, "expenseFormatted": "₹2,500" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+#### `POST /api/trips/:id/share`
+Generates a secure public share token for the itinerary.
+
+- **Headers:** `Authorization: Bearer <token>`
+- **Response `200 OK`**:
+```json
+{
+  "success": true,
+  "data": {
+    "shareToken": "gt_share_9f8d2b1a",
+    "shareUrl": "http://localhost:5174/share/gt_share_9f8d2b1a",
+    "isActive": true,
+    "viewCount": 0
   }
 }
 ```

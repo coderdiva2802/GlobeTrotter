@@ -10,8 +10,8 @@ import SearchFilterBar from './components/home/SearchFilterBar.jsx';
 import RegionalSelections from './components/home/RegionalSelections.jsx';
 import PreviousTrips from './components/home/PreviousTrips.jsx';
 import FloatingPlanButton from './components/common/FloatingPlanButton.jsx';
-import PlanTripModal from './components/modals/PlanTripModal.jsx';
-import TripDetailsModal from './components/modals/TripDetailsModal.jsx';
+import CreateTripWizard from './components/wizard/CreateTripWizard.jsx';
+import DayWiseItineraryView from './components/itinerary/DayWiseItineraryView.jsx';
 import RegionDetailsModal from './components/modals/RegionDetailsModal.jsx';
 import { apiService } from './services/api.js';
 import './App.css';
@@ -47,9 +47,8 @@ function Dashboard() {
   const [activeSort, setActiveSort] = useState('default'); // 'default' | 'title' | 'date'
   const [activeGroupBy, setActiveGroupBy] = useState('none'); // 'none' | 'region' | 'status'
 
-  // Modal States
-  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
-  const [selectedTrip, setSelectedTrip] = useState(null);
+  // Selected & Modal States
+  const [activeItineraryTrip, setActiveItineraryTrip] = useState(null);
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
 
@@ -92,11 +91,24 @@ function Dashboard() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Handle trip creation
-  const handleCreateTrip = async (tripFormData) => {
+  // Handle completed trip creation from wizard -> navigate to Itinerary View
+  const handleWizardComplete = async (tripFormData) => {
     const createdTrip = await apiService.createTrip(tripFormData);
     setTrips((prev) => [createdTrip, ...prev]);
-    showToast(`🎉 "${createdTrip.name}" has been created successfully!`);
+    setActiveItineraryTrip(createdTrip);
+    setActiveTab('itinerary-view');
+    showToast(`🎉 "${createdTrip.name}" itinerary created!`);
+  };
+
+  // Handle saving draft from wizard
+  const handleSaveDraft = async (draftData) => {
+    const draftTrip = await apiService.createTrip({
+      ...draftData,
+      name: draftData.name || 'Untitled Draft Trip',
+    });
+    setTrips((prev) => [draftTrip, ...prev]);
+    setActiveTab('home');
+    showToast(`💾 Draft saved: "${draftTrip.name}"`);
   };
 
   // Filter and sort trips
@@ -168,7 +180,11 @@ function Dashboard() {
 
       {/* 1. Header Navigation Bar */}
       <Navbar
-        activeTab={activeTab}
+        activeTab={
+          activeTab === 'create-trip' || activeTab === 'itinerary-view'
+            ? 'trips'
+            : activeTab
+        }
         onTabChange={(tab) => {
           setActiveTab(tab);
           if (tab === 'trips') {
@@ -182,12 +198,28 @@ function Dashboard() {
         }}
       />
 
-      {/* Main Page Layout */}
+      {/* Main Page Content */}
       <main className="main-content">
+        {activeTab === 'itinerary-view' && (
+          <DayWiseItineraryView
+            trip={activeItineraryTrip}
+            onEditItinerary={() => setActiveTab('create-trip')}
+            onBackToDashboard={() => setActiveTab('home')}
+          />
+        )}
+
+        {activeTab === 'create-trip' && (
+          <CreateTripWizard
+            onComplete={handleWizardComplete}
+            onSaveDraft={handleSaveDraft}
+            onCancel={() => setActiveTab('home')}
+          />
+        )}
+
         {activeTab === 'home' && (
           <>
             {/* 2. Canyon Hero Banner */}
-            <HeroBanner onExploreClick={() => setIsPlanModalOpen(true)} />
+            <HeroBanner onExploreClick={() => setActiveTab('create-trip')} />
 
             {/* 3. Search & Filter Bar */}
             <SearchFilterBar
@@ -213,9 +245,12 @@ function Dashboard() {
             {/* 5. Previous Trips Section */}
             <PreviousTrips
               trips={processedTrips}
-              onViewDetails={(trip) => setSelectedTrip(trip)}
+              onViewDetails={(trip) => {
+                setActiveItineraryTrip(trip);
+                setActiveTab('itinerary-view');
+              }}
               onViewAll={() => setActiveTab('trips')}
-              onPlanTrip={() => setIsPlanModalOpen(true)}
+              onPlanTrip={() => setActiveTab('create-trip')}
             />
           </>
         )}
@@ -229,6 +264,13 @@ function Dashboard() {
                   All your planned, ongoing, and completed adventures in one place.
                 </p>
               </div>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={() => setActiveTab('create-trip')}
+              >
+                + New Trip
+              </button>
             </div>
 
             <SearchFilterBar
@@ -244,9 +286,12 @@ function Dashboard() {
 
             <PreviousTrips
               trips={processedTrips}
-              onViewDetails={(trip) => setSelectedTrip(trip)}
+              onViewDetails={(trip) => {
+                setActiveItineraryTrip(trip);
+                setActiveTab('itinerary-view');
+              }}
               onViewAll={() => {}}
-              onPlanTrip={() => setIsPlanModalOpen(true)}
+              onPlanTrip={() => setActiveTab('create-trip')}
             />
           </div>
         )}
@@ -280,27 +325,17 @@ function Dashboard() {
       </main>
 
       {/* 6. Floating Action Button: + Plan a trip */}
-      <FloatingPlanButton onClick={() => setIsPlanModalOpen(true)} />
+      {activeTab !== 'create-trip' && activeTab !== 'itinerary-view' && (
+        <FloatingPlanButton onClick={() => setActiveTab('create-trip')} />
+      )}
 
-      {/* 7. Modals */}
-      <PlanTripModal
-        isOpen={isPlanModalOpen}
-        onClose={() => setIsPlanModalOpen(false)}
-        onSubmitTrip={handleCreateTrip}
-      />
-
-      <TripDetailsModal
-        trip={selectedTrip}
-        isOpen={Boolean(selectedTrip)}
-        onClose={() => setSelectedTrip(null)}
-      />
-
+      {/* 7. Region Details Modal */}
       <RegionDetailsModal
         region={selectedRegion}
         isOpen={Boolean(selectedRegion)}
         onClose={() => setSelectedRegion(null)}
         onPlanForRegion={() => {
-          setIsPlanModalOpen(true);
+          setActiveTab('create-trip');
         }}
       />
     </div>

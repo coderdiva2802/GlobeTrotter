@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { mockUser, mockRegions, mockTrips } from './mockData.js';
+import { mockUser, mockRegions, mockTrips, mockCities, mockActivities, mockDayWiseItinerary } from './mockData.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
@@ -75,6 +75,27 @@ export const apiService = {
   },
 
   /**
+   * Get city / destination suggestions for autocomplete
+   */
+  async getDestinationSuggestions(query = '') {
+    try {
+      const response = await apiClient.get('/destinations/autocomplete', {
+        params: { q: query },
+      });
+      return response.data.data;
+    } catch {
+      if (!query.trim()) return mockCities;
+      const q = query.toLowerCase();
+      return mockCities.filter(
+        (c) =>
+          c.cityName.toLowerCase().includes(q) ||
+          c.countryName.toLowerCase().includes(q) ||
+          c.displayName.toLowerCase().includes(q)
+      );
+    }
+  },
+
+  /**
    * Search destinations, trips, and experiences
    */
   async search(query, filters = {}) {
@@ -138,6 +159,64 @@ export const apiService = {
         currency: 'USD',
       };
       return newTrip;
+    }
+  },
+
+  /**
+   * Search activities for a specific city or keyword
+   */
+  async searchActivities(cityName = '', query = '') {
+    try {
+      const response = await apiClient.get('/activities/search', {
+        params: { city: cityName, q: query },
+      });
+      return response.data.data;
+    } catch {
+      let filtered = [...mockActivities];
+      if (cityName) {
+        filtered = filtered.filter(
+          (a) => a.cityName.toLowerCase() === cityName.toLowerCase()
+        );
+      }
+      if (query) {
+        const q = query.toLowerCase();
+        filtered = filtered.filter(
+          (a) =>
+            a.name.toLowerCase().includes(q) ||
+            a.category.toLowerCase().includes(q)
+        );
+      }
+      return filtered.length > 0 ? filtered : mockActivities;
+    }
+  },
+
+  /**
+   * Get full day-wise itinerary and budget summary
+   */
+  async getTripItinerary(tripId) {
+    try {
+      const response = await apiClient.get(`/trips/${tripId}/itinerary`);
+      return response.data.data;
+    } catch {
+      return mockDayWiseItinerary;
+    }
+  },
+
+  /**
+   * Generate public shareable link
+   */
+  async shareTrip(tripId) {
+    try {
+      const response = await apiClient.post(`/trips/${tripId}/share`);
+      return response.data.data;
+    } catch {
+      const token = `gt_share_${Math.random().toString(36).substring(2, 10)}`;
+      return {
+        shareToken: token,
+        shareUrl: `${window.location.origin}/share/${token}`,
+        isActive: true,
+        viewCount: 1,
+      };
     }
   },
 };

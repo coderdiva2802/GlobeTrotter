@@ -127,3 +127,143 @@ export const mockTrips = [
     currency: "USD"
   }
 ];
+
+export const mockCities = [
+  { cityId: 1, cityName: "Paris", countryName: "France", displayName: "Paris, France", region: "Europe" },
+  { cityId: 2, cityName: "Tokyo", countryName: "Japan", displayName: "Tokyo, Japan", region: "Asia" },
+  { cityId: 3, cityName: "Rome", countryName: "Italy", displayName: "Rome, Italy", region: "Europe" },
+  { cityId: 4, cityName: "Santorini", countryName: "Greece", displayName: "Santorini, Greece", region: "Europe" },
+  { cityId: 5, cityName: "Malé", countryName: "Maldives", displayName: "Malé, Maldives", region: "Asia" },
+  { cityId: 6, cityName: "New York", countryName: "United States", displayName: "New York, USA", region: "North America" },
+  { cityId: 9, cityName: "Cape Town", countryName: "South Africa", displayName: "Cape Town, South Africa", region: "Africa" },
+  { cityId: 10, cityName: "Buenos Aires", countryName: "Argentina", displayName: "Buenos Aires, Argentina", region: "South America" },
+  { cityId: 11, cityName: "Cairo", countryName: "Egypt", displayName: "Cairo, Egypt", region: "Africa" },
+  { cityId: 12, cityName: "Amsterdam", countryName: "Netherlands", displayName: "Amsterdam, Netherlands", region: "Europe" },
+  { cityId: 13, cityName: "Berlin", countryName: "Germany", displayName: "Berlin, Germany", region: "Europe" }
+];
+
+export const mockActivities = [
+  {
+    id: 501,
+    name: "Louvre Museum Guided Tour",
+    cityName: "Paris",
+    category: "Museums & Culture",
+    durationMinutes: 180,
+    rating: 4.8,
+    estimatedCost: 3500,
+    currency: "INR",
+  },
+  {
+    id: 502,
+    name: "Eiffel Tower Summit & Seine Cruise",
+    cityName: "Paris",
+    category: "Sightseeing",
+    durationMinutes: 120,
+    rating: 4.9,
+    estimatedCost: 4500,
+    currency: "INR",
+  },
+  {
+    id: 503,
+    name: "Montmartre Bohemian Walking Tour",
+    cityName: "Paris",
+    category: "Cafés & Highlights",
+    durationMinutes: 150,
+    rating: 4.7,
+    estimatedCost: 2000,
+    currency: "INR",
+  },
+  {
+    id: 504,
+    name: "Amsterdam Canal Cruise & Wine Tasting",
+    cityName: "Amsterdam",
+    category: "Canals & Culture",
+    durationMinutes: 90,
+    rating: 4.9,
+    estimatedCost: 2800,
+    currency: "INR",
+  },
+  {
+    id: 505,
+    name: "Rijksmuseum Masterpieces Tour",
+    cityName: "Amsterdam",
+    category: "Art & History",
+    durationMinutes: 120,
+    rating: 4.8,
+    estimatedCost: 3200,
+    currency: "INR",
+  },
+  {
+    id: 506,
+    name: "Berlin Wall Memorial & Cold War Walking Tour",
+    cityName: "Berlin",
+    category: "History & Architecture",
+    durationMinutes: 180,
+    rating: 4.9,
+    estimatedCost: 2500,
+    currency: "INR",
+  },
+  {
+    id: 507,
+    name: "Kreuzberg Street Food & Nightlife Experience",
+    cityName: "Berlin",
+    category: "Food & Nightlife",
+    durationMinutes: 210,
+    rating: 4.8,
+    estimatedCost: 3800,
+    currency: "INR",
+  },
+];
+
+export const mockDayWiseItinerary = {
+  trip: {
+    id: 105,
+    name: "abc",
+    status: "UPCOMING",
+    locationSummary: "xyz",
+    startDate: "2026-08-31",
+    endDate: "2026-09-05",
+    formattedDates: "2026-08-31 - 2026-09-05",
+    coverImageUrl: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1600&q=80",
+  },
+  budgetSummary: {
+    totalBudget: 120000,
+    totalBudgetFormatted: "₹1,20,000",
+    plannedExpenses: 96500,
+    plannedExpensesFormatted: "₹96,500",
+    remainingBudget: 23500,
+    remainingBudgetFormatted: "₹23,500",
+    currency: "INR",
+  },
+  days: [
+    {
+      id: 1,
+      dayNumber: 1,
+      dayLabel: "Day 1",
+      dateFormatted: "June 10",
+      cityName: "Paris",
+      locationHeader: "Paris • June 10",
+      items: [
+        { id: 1, time: "09:00 AM", activityName: "Eiffel Tower", expense: 2500, expenseFormatted: "₹2,500" },
+        { id: 2, time: "01:00 PM", activityName: "Lunch at Le Marais", expense: 1800, expenseFormatted: "₹1,800" },
+        { id: 3, time: "05:30 PM", activityName: "Seine River Cruise", expense: 3000, expenseFormatted: "₹3,000" },
+      ],
+    },
+    {
+      id: 2,
+      dayNumber: 2,
+      dayLabel: "Day 2",
+      dateFormatted: "June 11",
+      cityName: "Paris",
+      locationHeader: "Paris • June 11",
+      items: [
+        { id: 4, time: "10:00 AM", activityName: "Louvre Museum", expense: 2000, expenseFormatted: "₹2,000" },
+        { id: 5, time: "03:00 PM", activityName: "Montmartre Walk", expense: 0, expenseFormatted: "Free" },
+        { id: 6, time: "08:00 PM", activityName: "Dinner Experience", expense: 2500, expenseFormatted: "₹2,500" },
+      ],
+    },
+  ],
+};
+
+
+
