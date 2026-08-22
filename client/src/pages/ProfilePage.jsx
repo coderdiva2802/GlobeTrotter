@@ -94,9 +94,9 @@ export default function ProfilePage() {
     };
   }, [userTrips, preplannedTrips]);
 
-  // Unified Active User Object
+  // Unified Active User Object - ALWAYS prioritize the signed-in authUser
   const displayUser = useMemo(() => {
-    const baseUser = profileOverriddenUser || authUser;
+    const baseUser = authUser || profileOverriddenUser;
     if (!baseUser) return null;
 
     const name = baseUser.firstName

@@ -64,22 +64,22 @@ export const getDestinationCoverImage = (destination = '') => {
 
 export const mockUser = {
   id: 1,
-  name: 'Aarohi Sharma',
-  firstName: 'Aarohi',
-  lastName: 'Sharma',
-  fullName: 'Aarohi Sharma',
-  email: 'aarohi.sharma@example.com',
+  name: 'Aliza Saiyed',
+  firstName: 'Aliza',
+  lastName: 'Saiyed',
+  fullName: 'Aliza Saiyed',
+  email: 'traveler@globetrotter.com',
   phoneNumber: '+91 9876543210',
   city: 'Mumbai',
   country: 'India',
   bio: 'Passionate travel blogger exploring hidden gems, architecture, and local culinary adventures around the world.',
   role: 'USER',
-  profileImageUrl: '', // Empty triggers the avatar circle with initial / name fallback like in screenshot
+  profileImageUrl: '',
   stats: {
-    tripsPlanned: 12,
-    placesExplored: 18,
-    photosCaptured: 234,
-    countriesVisited: 6,
+    tripsPlanned: 3,
+    placesExplored: 6,
+    upcomingTrips: 2,
+    countriesVisited: 3,
   },
   preference: {
     language: 'en',
