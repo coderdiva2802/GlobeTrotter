@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { mockUser, mockRegions, mockTrips } from './mockData.js';
+import { mockUser, mockRegions, mockTrips, mockPreplannedTrips, mockPreviousTrips } from './mockData.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
@@ -48,6 +48,43 @@ export const apiService = {
   },
 
   /**
+   * Get user profile along with travel statistics and categorized trips
+   */
+  async getUserProfileWithStats() {
+    try {
+      const response = await api.get('/users/profile');
+      return response.data?.data || {
+        user: mockUser,
+        preplannedTrips: mockPreplannedTrips,
+        previousTrips: mockPreviousTrips,
+      };
+    } catch {
+      return {
+        user: mockUser,
+        preplannedTrips: mockPreplannedTrips,
+        previousTrips: mockPreviousTrips,
+      };
+    }
+  },
+
+  /**
+   * Update user profile information
+   */
+  async updateUserProfile(profileData) {
+    try {
+      const response = await api.put('/users/profile', profileData);
+      return response.data?.data?.user || response.data?.data;
+    } catch {
+      // Mock update fallback
+      return {
+        ...mockUser,
+        ...profileData,
+        name: `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim() || mockUser.name,
+      };
+    }
+  },
+
+  /**
    * Get top regional selections
    */
   async getRegions() {
@@ -71,6 +108,30 @@ export const apiService = {
     } catch {
       if (status === 'all') return mockTrips;
       return mockTrips.filter((trip) => trip.status.toLowerCase() === status.toLowerCase());
+    }
+  },
+
+  /**
+   * Get upcoming / preplanned trips
+   */
+  async getPreplannedTrips() {
+    try {
+      const response = await api.get('/trips/user', { params: { status: 'upcoming' } });
+      return response.data?.data || mockPreplannedTrips;
+    } catch {
+      return mockPreplannedTrips;
+    }
+  },
+
+  /**
+   * Get past / completed trips
+   */
+  async getPreviousTrips() {
+    try {
+      const response = await api.get('/trips/user', { params: { status: 'completed' } });
+      return response.data?.data || mockPreviousTrips;
+    } catch {
+      return mockPreviousTrips;
     }
   },
 

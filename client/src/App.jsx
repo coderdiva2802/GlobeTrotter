@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.jsx';
 import { useAuth } from './context/useAuth.js';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
 import Navbar from './components/layout/Navbar.jsx';
 import HeroBanner from './components/home/HeroBanner.jsx';
 import SearchFilterBar from './components/home/SearchFilterBar.jsx';
@@ -35,6 +36,7 @@ function ProtectedRoute({ children }) {
 }
 
 function Dashboard() {
+  const navigate = useNavigate();
   const { user: authUser, logout } = useAuth();
   const [activeTab, setActiveTab] = useState('home');
   const [userData, setUserData] = useState(null);
@@ -170,9 +172,13 @@ function Dashboard() {
       <Navbar
         activeTab={activeTab}
         onTabChange={(tab) => {
-          setActiveTab(tab);
-          if (tab === 'trips') {
-            setActiveFilter('all');
+          if (tab === 'profile') {
+            navigate('/profile');
+          } else {
+            setActiveTab(tab);
+            if (tab === 'trips') {
+              setActiveFilter('all');
+            }
           }
         }}
         user={displayUser}
@@ -319,6 +325,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
               </ProtectedRoute>
             }
           />

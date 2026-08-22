@@ -108,11 +108,11 @@ export const Navbar = ({ activeTab, onTabChange, user, onSearchOpen }) => {
                   className="dropdown-item"
                   onClick={() => {
                     setIsProfileMenuOpen(false);
-                    onTabChange('trips');
+                    onTabChange('profile');
                   }}
                 >
                   <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <UserIcon size={15} /> My Profile & Trips
+                    <UserIcon size={15} /> My Profile & Travel Stats
                   </span>
                 </button>
 
