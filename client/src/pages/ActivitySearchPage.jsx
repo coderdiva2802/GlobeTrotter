@@ -1,21 +1,33 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import Navbar from '../components/layout/Navbar';
-import ActivitySearchBanner from '../components/search/ActivitySearchBanner';
-import ActivitySearchBar from '../components/search/ActivitySearchBar';
-import ActivityCard from '../components/search/ActivityCard';
-import ActivityDetailsModal from '../components/search/ActivityDetailsModal';
-import { apiService } from '../services/api';
-import { mockActivities } from '../services/mockData';
+import Navbar from '../components/layout/Navbar.jsx';
+import ActivitySearchBanner from '../components/search/ActivitySearchBanner.jsx';
+import ActivitySearchBar from '../components/search/ActivitySearchBar.jsx';
+import ActivityCard from '../components/search/ActivityCard.jsx';
+import ActivityDetailsModal from '../components/search/ActivityDetailsModal.jsx';
+import { useAuth } from '../context/useAuth.js';
+import { apiService } from '../services/api.js';
+import { mockActivities } from '../services/mockData.js';
 import './ActivitySearchPage.css';
 
 export default function ActivitySearchPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { user: authUser } = useAuth();
 
-  const [currentUser, setCurrentUser] = useState(null);
+  const [fetchedUser, setFetchedUser] = useState(null);
   const [activitiesList, setActivitiesList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Unified user identity for Navbar
+  const displayUser = useMemo(() => {
+    const u = authUser || fetchedUser;
+    if (!u) return null;
+    const name = u.firstName
+      ? `${u.firstName}${u.lastName ? ' ' + u.lastName : ''}`
+      : u.name || u.fullName || 'User Profile';
+    return { ...u, name, fullName: name };
+  }, [authUser, fetchedUser]);
 
   // Search, Group, Filter, and Sort states
   const initialQuery = searchParams.get('q') || '';
@@ -41,7 +53,7 @@ export default function ActivitySearchPage() {
             groupBy: activeGroupBy,
           }),
         ]);
-        setCurrentUser(user);
+        setFetchedUser(user);
         const list = Array.isArray(searchResult)
           ? searchResult
           : (searchResult?.activities || []);
@@ -50,6 +62,9 @@ export default function ActivitySearchPage() {
         } else {
           setActivitiesList(list);
         }
+      } catch (err) {
+        console.error('Error searching activities:', err);
+        setActivitiesList(mockActivities);
       } finally {
         setIsLoading(false);
       }
@@ -68,29 +83,43 @@ export default function ActivitySearchPage() {
   };
 
   const handleAddToTrip = (activity) => {
-    showToast(`✅ "${activity.name}" added to your trip itinerary!`);
+    showToast(`✅ "${activity.name || 'Activity'}" added to your trip itinerary!`);
   };
 
   const handleTabChange = (tab) => {
-    if (tab === 'home' || tab === 'trips' || tab === 'community') {
+    if (tab === 'home') {
       navigate('/dashboard');
+    } else if (tab === 'trips') {
+      navigate('/dashboard?tab=trips');
+    } else if (tab === 'calendar') {
+      navigate('/dashboard?tab=calendar');
+    } else if (tab === 'community') {
+      navigate('/dashboard?tab=community');
     } else if (tab === 'profile') {
       navigate('/profile');
+    } else if (tab === 'search' || tab === 'activities') {
+      // Already on activities search page
+      setSearchQuery('');
+      setSearchParams({});
     }
   };
 
   // Optional Grouping Logic
   const groupedActivities = useMemo(() => {
+    if (!Array.isArray(activitiesList) || activitiesList.length === 0) {
+      return [{ groupName: null, items: [] }];
+    }
     if (activeGroupBy === 'none') {
       return [{ groupName: null, items: activitiesList }];
     }
     const map = {};
     activitiesList.forEach((act) => {
       let key = 'Other';
-      if (activeGroupBy === 'location') key = act.destination;
+      if (activeGroupBy === 'location') key = act.destination || act.cityName || 'Popular Destination';
       else if (activeGroupBy === 'difficulty') key = act.difficulty || 'General';
       else if (activeGroupBy === 'price') {
-        key = act.price < 5000 ? 'Budget Friendly (< ₹5,000)' : 'Premium Tours (≥ ₹5,000)';
+        const p = Number(act.price || act.estimatedCost || 0);
+        key = p < 5000 ? 'Budget Friendly (< ₹5,000)' : 'Premium Tours (≥ ₹5,000)';
       }
       if (!map[key]) map[key] = [];
       map[key].push(act);
@@ -107,11 +136,15 @@ export default function ActivitySearchPage() {
         </div>
       )}
 
-      {/* Top Navbar */}
+      {/* Unified Top Navbar */}
       <Navbar
-        activeTab="search"
+        activeTab="activities"
         onTabChange={handleTabChange}
-        user={currentUser}
+        user={displayUser}
+        onSearchOpen={() => {
+          const el = document.querySelector('.activity-search-input-box input');
+          if (el) el.focus();
+        }}
       />
 
       {/* Main Container */}
@@ -181,6 +214,7 @@ export default function ActivitySearchPage() {
                 className="clear-all-filters-btn"
                 onClick={() => {
                   setSearchQuery('');
+                  setSearchParams({});
                   setActiveFilter('all');
                   setActiveSortBy('default');
                   setActiveGroupBy('none');

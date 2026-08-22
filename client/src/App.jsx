@@ -30,11 +30,23 @@ import { apiService } from './services/api.js';
 import { mockRegions, mockTrips } from './services/mockData.js';
 import './App.css';
 
+import { useSearchParams } from 'react-router-dom';
+
 function Dashboard() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user: authUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'trips' | 'calendar' | 'community' | 'create-trip' | 'itinerary-view'
-  const [tripsViewMode, setTripsViewMode] = useState('cards'); // 'cards' | 'calendar'
+
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tabParam || 'home');
+
+  useEffect(() => {
+    if (tabParam) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
+
+  const [tripsViewMode, setTripsViewMode] = useState('cards');
 
   const [userData, setUserData] = useState(null);
   const [regions, setRegions] = useState(mockRegions);

@@ -2,6 +2,8 @@ import { MapPin, Clock, Users, Star, ChevronRight } from 'lucide-react';
 import './ActivityCard.css';
 
 export default function ActivityCard({ activity, onViewDetails }) {
+  if (!activity) return null;
+
   const getBadgeClass = (variant) => {
     switch (variant?.toLowerCase()) {
       case 'blue':
@@ -25,7 +27,22 @@ export default function ActivityCard({ activity, onViewDetails }) {
     }
   };
 
-  const isModerate = activity.difficulty?.toLowerCase() === 'moderate';
+  const difficultyStr = activity.difficulty || 'Easy';
+  const isModerate = difficultyStr.toLowerCase() === 'moderate';
+
+  const priceVal = activity.price ?? activity.estimatedCost;
+  const formattedPriceDisplay =
+    activity.formattedPrice ||
+    (priceVal != null && !isNaN(Number(priceVal))
+      ? `₹${Number(priceVal).toLocaleString('en-IN')}`
+      : '₹2,499');
+
+  const ratingVal = activity.rating || 4.8;
+  const reviewCountVal = activity.reviewCount || 42;
+
+  const destinationText =
+    activity.destination ||
+    (activity.cityName ? `${activity.cityName}${activity.countryName ? ', ' + activity.countryName : ''}` : 'Popular Destination');
 
   return (
     <div
@@ -37,9 +54,10 @@ export default function ActivityCard({ activity, onViewDetails }) {
         <img
           src={
             activity.coverImageUrl ||
+            activity.imageUrl ||
             'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80'
           }
-          alt={activity.name}
+          alt={activity.name || 'Activity'}
           className="activity-card-thumbnail"
           loading="lazy"
         />
@@ -53,26 +71,26 @@ export default function ActivityCard({ activity, onViewDetails }) {
       {/* Center Column: Details & Chips */}
       <div className="activity-card-info-box">
         <div className="activity-card-info-top">
-          <h3 className="activity-card-title">{activity.name}</h3>
+          <h3 className="activity-card-title">{activity.name || 'Curated Activity'}</h3>
 
           <div className="activity-card-location">
             <MapPin size={14} className="activity-location-icon" />
-            <span>{activity.destination}</span>
+            <span>{destinationText}</span>
           </div>
 
-          <p className="activity-card-desc">{activity.description}</p>
+          <p className="activity-card-desc">{activity.description || 'Enjoy a memorable curated activity guided by local experts.'}</p>
         </div>
 
         {/* Metadata Chips (Duration, Difficulty, Group Size) */}
         <div className="activity-chips-row">
           <div className="meta-chip duration-chip">
             <Clock size={13} className="chip-icon" />
-            <span>{activity.durationLabel || `${activity.durationDays} Days`}</span>
+            <span>{activity.durationLabel || (activity.durationDays ? `${activity.durationDays} Days` : 'Half Day')}</span>
           </div>
 
-          {activity.difficulty && (
+          {difficultyStr && (
             <div className={`meta-chip difficulty-chip ${isModerate ? 'difficulty-moderate' : 'difficulty-easy'}`}>
-              <span>{activity.difficulty}</span>
+              <span>{difficultyStr}</span>
             </div>
           )}
 
@@ -90,14 +108,14 @@ export default function ActivityCard({ activity, onViewDetails }) {
         {/* Rating */}
         <div className="activity-rating-line">
           <Star size={15} className="activity-star-icon" fill="#eab308" color="#eab308" />
-          <span className="rating-score">{activity.rating}</span>
-          <span className="reviews-count">({activity.reviewCount} reviews)</span>
+          <span className="rating-score">{ratingVal}</span>
+          <span className="reviews-count">({reviewCountVal} reviews)</span>
         </div>
 
         {/* Price display */}
         <div className="activity-price-display">
           <span className="price-prefix">From</span>
-          <span className="price-amount">{activity.formattedPrice || `₹${activity.price.toLocaleString('en-IN')}`}</span>
+          <span className="price-amount">{formattedPriceDisplay}</span>
           <span className="price-unit">per person</span>
         </div>
 
